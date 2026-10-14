@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Monument Syndicate - 20,000 Architecture Edition</title>
+<style>
+  :root {
+    --bg-base: #090a0d;
+    --panel-bg: #11141a;
+    --panel-border: #222834;
+    --silver-bright: #e8ecf2;
+    --silver-main: #9ca6b8;
+    --silver-dim: #626d80;
+    --silver-dark: #252c3a;
+    
+    --status-green: #4ade80;
+    --status-red: #ef4444;
+    --status-amber: #f59e0b;
+    --status-blue: #38bdf8;
+    --status-purple: #d946ef;
+    --status-exotic: #0ea5e9;
+    
+    --t0-col: #64748b; --t1-col: #4ade80; --t2-col: #38bdf8; --t3-col: #3b82f6; --t4-col: #a855f7; 
+    --t5-col: #d946ef; --t6-col: #f59e0b; --t7-col: #ea580c; --t8-col: #ef4444; --t9-col: #10b981;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+  html, body { width: 100%; height: 100%; background: var(--bg-base); color: var(--silver-bright); display: flex; flex-direction: column; overflow: hidden; }
+
+  body::before {
+    content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.05) 0%, transparent 65%);
+    pointer-events: none; z-index: 1;
+  }
+
+  header { flex-shrink: 0; background: #040507; border-bottom: 1px solid var(--status-amber); padding: 6px 10px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+  .header-top { display: flex; justify-content: space-between; align-items: center; }
+  .brand-title { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #fff; }
+  .brand-title span { color: var(--status-amber); text-shadow: 0 0 6px rgba(245,158,11,0.5); }
+
+  .hud-stats { display: flex; gap: 4px; overflow-x: auto; white-space: nowrap; padding-bottom: 2px; }
+  .hud-stats::-webkit-scrollbar { display: none; }
+  .hud-pill { background: #000; border: 1px solid var(--panel-border); padding: 3px 6px; border-radius: 3px; font-size: 10px; font-family: monospace; font-weight: bold; }
+
+  nav { flex-shrink: 0; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--panel-bg); border-bottom: 1px solid var(--panel-border); z-index: 9; }
+  .nav-btn { padding: 10px 4px; background: transparent; border: none; border-right: 1px solid var(--panel-border); border-bottom: 1px solid var(--panel-border); color: var(--silver-dim); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: 0.15s; text-align: center; }
+  .nav-btn:nth-child(3n) { border-right: none; }
+  .nav-btn:nth-child(n+7) { border-bottom: none; }
+  .nav-btn.active { background: rgba(245, 158, 11, 0.1); color: var(--status-amber); box-shadow: inset 0 -2px 0 var(--status-amber); }
+
+  main { flex: 1; overflow-y: auto; padding: 10px; padding-bottom: 70px; z-index: 2; }
+  .view-tab { display: none; flex-direction: column; gap: 10px; }
+  .view-tab.active { display: flex; }
+
+  .panel { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 5px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .panel-header { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #fff; padding-bottom: 6px; border-bottom: 1px solid var(--panel-border); display: flex; justify-content: space-between; align-items: center; }
+
+  .control-bar { display: flex; flex-wrap: wrap; gap: 6px; background: #060709; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--panel-border); align-items: center; }
+  .control-group { display: flex; gap: 4px; align-items: center; border-right: 1px solid var(--panel-border); padding-right: 6px; }
+  .control-group:last-child { border-right: none; padding-right: 0; }
+  .control-label { font-size: 8.5px; font-weight: bold; color: var(--silver-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  button.btn { background: #000; border: 1px solid var(--silver-dim); color: var(--silver-bright); padding: 5px 9px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 3px; cursor: pointer; transition: 0.1s; }
+  button.btn:active { background: var(--silver-bright); color: #000; border-color: var(--silver-bright); }
+  button.btn:disabled { opacity: 0.35; cursor: not-allowed; border-color: var(--silver-dark); }
+  button.btn-green { background: #071510; border-color: var(--status-green); color: var(--status-green); }
+  button.btn-green:active { background: var(--status-green); color: #000; }
+  button.btn-danger { border-color: var(--status-red); color: var(--status-red); }
+  button.btn-danger:active { background: var(--status-red); color: #fff; }
+  button.btn-purple { border-color: var(--status-purple); color: var(--status-purple); }
+  button.btn-purple:active { background: var(--status-purple); color: #fff; }
+
+  .fleet-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  @media(min-width: 600px) { .fleet-grid { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); } }
+
+  .strain-card { background: #060709; border: 1px solid var(--panel-border); border-radius: 4px; padding: 10px; display: flex; flex-direction: column; gap: 6px; position: relative; }
+  .strain-card.in-flight { border-left: 3px solid var(--status-amber); }
+  .strain-card.damaged { border-left: 3px solid var(--status-red); }
+  
+  .bud-art-container { display: flex; gap: 10px; align-items: center; background: #090b10; border: 1px solid var(--panel-border); padding: 6px; border-radius: 3px; }
+  .bud-pixel-canvas { width: 64px; height: 64px; image-rendering: pixelated; border-radius: 2px; background: #000; flex-shrink: 0; border: 1px solid #222938; cursor: zoom-in; }
+
+  .spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; background: #090b10; padding: 6px; border-radius: 3px; font-size: 9px; font-family: monospace; border: 1px solid var(--panel-border); }
+  .spec-grid span { color: var(--silver-dim); }
+
+  .badge { padding: 2px 4px; border-radius: 2px; font-size: 8px; font-weight: 900; font-family: monospace; background: #071510; color: var(--status-green); border: 1px solid var(--status-green); }
+  
+  .route-row { background: #060709; border: 1px solid var(--panel-border); border-radius: 3px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
+
+  .flight-bar-bg { width: 100%; height: 6px; background: #111; border: 1px solid #282214; border-radius: 2px; overflow: hidden; margin-top: 2px; }
+  .flight-bar-fill { height: 100%; background: var(--status-amber); width: 0%; box-shadow: 0 0 6px var(--status-amber);}
+
+  .auction-slot { background: #060709; border: 1px solid var(--panel-border); padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; }
+  .auction-timer-bg { width: 100%; height: 5px; background: #111; border: 1px solid var(--status-green); border-radius: 2px; overflow: hidden; }
+  .auction-timer-bar { height: 100%; background: var(--status-green); width: 100%; transition: width 0.1s linear;}
+  .auction-log { height: 44px; background: #090b10; border: 1px solid var(--panel-border); padding: 4px; font-size: 8.5px; font-family: monospace; overflow: hidden; border-radius: 3px; color: var(--silver-main); }
+
+  .fraction-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .pack-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+  select { background: #090b10; color: #fff; border: 1px solid var(--silver-dark); padding: 5px; font-size: 10px; border-radius: 3px; outline: none; font-weight: bold; cursor: pointer; }
+  
+  .check-item { display: flex; justify-content: space-between; align-items: center; background: #060709; padding: 8px 10px; border: 1px solid var(--panel-border); border-radius: 3px; font-size: 10px; }
+  .check-item.done { border-color: var(--status-green); background: rgba(74, 222, 128, 0.08); }
+
+  /* 3D Voxel Architecture Inspector Modal */
+  #voxel-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 2000; align-items: center; justify-content: center; padding: 16px; }
+  #voxel-modal.open { display: flex; }
+  .modal-box { background: var(--panel-bg); border: 1px solid var(--status-amber); border-radius: 8px; padding: 12px; max-width: 440px; width: 100%; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.95); }
+  #inspect-canvas { width: 100%; height: auto; aspect-ratio: 1/1; background: #050608; border-radius: 4px; cursor: grab; image-rendering: pixelated; border: 1px solid var(--panel-border); }
+
+  #toast-rack { position: fixed; bottom: 16px; left: 10px; right: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 1000; pointer-events: none; }
+  .toast { background: #000; border: 1px solid var(--silver-dark); border-left: 3px solid var(--status-amber); color: #fff; padding: 8px 12px; font-size: 11px; font-weight: bold; font-family: monospace; border-radius: 3px; box-shadow: 0 4px 15px rgba(0,0,0,0.9); animation: slideUp 0.2s, fadeOut 0.4s 2.6s forwards; pointer-events: auto;}
+  
+  @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes fadeOut { to { opacity: 0; transform: translateY(-5px); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="brand-title">MONUMENT SYNDICATE <span>// 20,000 LANDMARKS</span></div>
+    <div style="display:flex; gap:4px;">
+      <button class="btn" style="padding:3px 6px; font-size:8px;" onclick="saveGame()">SAVE</button>
+      <button class="btn" style="padding:3px 6px; font-size:8px;" onclick="loadGame()">LOAD</button>
+      <button class="btn btn-danger" style="padding:3px 6px; font-size:8px;" onclick="godMode()"> UNESCO</button>
+    </div>
+  </div>
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="hud-stats">
+        <div class="hud-pill">FUNDS: <span id="hud-funds" style="color:var(--status-green);">$0</span></div>
+        <div class="hud-pill">ESTATES: <span id="hud-fleet-count">0</span></div>
+        <div class="hud-pill">ARCHITECTS: <span id="hud-pilot-count">0</span></div>
+        <div class="hud-pill">MASONRY: <span id="hud-fuel" style="color:var(--status-amber);">0</span></div>
+      </div>
+      <div class="control-bar" style="padding:2px 4px; margin-left:4px;">
+        <button class="btn btn-green active" id="buy-1" style="padding:2px 4px; font-size:8px;" onclick="setBuyMode(1)">1x</button>
+        <button class="btn" id="buy-0.25" style="padding:2px 4px; font-size:8px;" onclick="setBuyMode(0.25)">25%</button>
+        <button class="btn" id="buy-0.5" style="padding:2px 4px; font-size:8px;" onclick="setBuyMode(0.5)">50%</button>
+        <button class="btn" id="buy-1.0" style="padding:2px 4px; font-size:8px;" onclick="setBuyMode(1.0)">MAX</button>
+      </div>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="setTab('market')">Blueprint Drops</button>
+  <button class="nav-btn" onclick="setTab('gacha')">Charters & Deeds</button>
+  <button class="nav-btn" onclick="setTab('fleet')">Landmark Estates</button>
+  <button class="nav-btn" onclick="setTab('pilots')">Architects</button>
+  <button class="nav-btn" onclick="setTab('routes')">World Expos</button>
+  <button class="nav-btn" onclick="setTab('auction')">Estate Auctions</button>
+  <button class="nav-btn" onclick="setTab('checklist')">Commissions</button>
+  <button class="nav-btn" onclick="setTab('upgrades')">Masonry Tech</button>
+  <button class="nav-btn" onclick="setTab('gallery')">Wonder Vault 🏰</button>
+</nav>
+
+<main>
+
+  <!-- TAB 1: REVOLVING BLUEPRINT MARKET (TEXT-ONLY FOR ZERO LAG) -->
+  <div id="tab-market" class="view-tab active">
+    <div class="panel">
+      <div class="panel-header">
+        <span>Architectural Blueprints & Historic Deeds</span>
+        <span style="font-size:10px; color:var(--silver-dim);">NEW DEED: <span id="market-timer" style="font-size:12px; font-weight:bold; color:var(--status-amber);">10.0</span>s</span>
+      </div>
+      <p style="font-size:10px; color:var(--silver-dim);">5 procedural cathedrals, mega-churches, castles, pagodas & ancient wonders surface every 10 seconds. Acquire a deed to construct its 512x512 3D Voxel Monument in your Landmark Estates.</p>
+      <div id="market-grid" class="fleet-grid"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: CHARTERS & DEEDS -->
+  <div id="tab-gacha" class="view-tab">
+    <div class="panel">
+      <div class="panel-header">Architectural Charters & Site Excavations</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; font-weight:bold; margin-bottom:6px;">PARISH & MANOR BLUEPRINT TUBE [T1-T4] ($20 / Tube)</div>
+          <div class="pack-row">
+            <button class="btn" onclick="buySeeds(0, 1)">Draft 1x</button>
+            <button class="btn" onclick="buySeeds(0, 5)">Draft 5x</button>
+            <button class="btn btn-green" onclick="buySeeds(0, 10)">Draft 10x</button>
+          </div>
+        </div>
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; color:var(--status-blue); font-weight:bold; margin-bottom:6px;">ROYAL CASTLE &MEGA-CAMPUS CHARTER [T3-T6] ($200 / Charter)</div>
+          <div class="pack-row">
+            <button class="btn" style="border-color:var(--status-blue); color:var(--status-blue);" onclick="buySeeds(1, 1)">Draft 1x</button>
+            <button class="btn" style="border-color:var(--status-blue); color:var(--status-blue);" onclick="buySeeds(1, 5)">Draft 5x</button>
+            <button class="btn btn-green" onclick="buySeeds(1, 10)">Draft 10x</button>
+          </div>
+        </div>
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; color:var(--status-purple); font-weight:bold; margin-bottom:6px;">GRAND CATHEDRAL & CITADEL GRANT [T5-T8] ($2,000 / Grant)</div>
+          <div class="pack-row">
+            <button class="btn btn-purple" onclick="buySeeds(2, 1)">Draft 1x</button>
+            <button class="btn btn-purple" onclick="buySeeds(2, 5)">Draft 5x</button>
+            <button class="btn btn-green" onclick="buySeeds(2, 10)">Draft 10x</button>
+          </div>
+        </div>
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; color:var(--status-amber); font-weight:bold; margin-bottom:6px;">WORLD WONDER SOVEREIGN DEED [T7-T10] ($15,000 / Deed)</div>
+          <div class="pack-row">
+            <button class="btn" style="border-color:var(--status-amber); color:var(--status-amber);" onclick="buySeeds(3, 1)">Draft 1x</button>
+            <button class="btn" style="border-color:var(--status-amber); color:var(--status-amber);" onclick="buySeeds(3, 5)">Draft 5x</button>
+            <button class="btn btn-green" onclick="buySeeds(3, 10)">Draft 10x</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">Master Architect & Mason Recruitment</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; font-weight:bold; margin-bottom:6px;">DRAFTSMEN & SURVEYORS [T1-T4] ($25 / Hire)</div>
+          <div class="pack-row">
+            <button class="btn" onclick="buyResumes(0, 1)">Hire 1x</button>
+            <button class="btn" onclick="buyResumes(0, 5)">Hire 5x</button>
+            <button class="btn btn-green" onclick="buyResumes(0, 10)">Hire 10x</button>
+          </div>
+        </div>
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; color:var(--status-blue); font-weight:bold; margin-bottom:6px;">STRUCTURAL ENGINEERS [T3-T6] ($150 / Hire)</div>
+          <div class="pack-row">
+            <button class="btn" style="border-color:var(--status-blue); color:var(--status-blue);" onclick="buyResumes(1, 1)">Hire 1x</button>
+            <button class="btn" style="border-color:var(--status-blue); color:var(--status-blue);" onclick="buyResumes(1, 5)">Hire 5x</button>
+            <button class="btn btn-green" onclick="buyResumes(1, 10)">Hire 10x</button>
+          </div>
+        </div>
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; color:var(--status-purple); font-weight:bold; margin-bottom:6px;">MASTER CATHEDRAL MASONS [T5-T8] ($800 / Hire)</div>
+          <div class="pack-row">
+            <button class="btn btn-purple" onclick="buyResumes(2, 1)">Hire 1x</button>
+            <button class="btn btn-purple" onclick="buyResumes(2, 5)">Hire 5x</button>
+            <button class="btn btn-green" onclick="buyResumes(2, 10)">Hire 10x</button>
+          </div>
+        </div>
+        <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px;">
+          <div style="font-size:10px; color:var(--status-amber); font-weight:bold; margin-bottom:6px;">PRITZKER STARCHITECTS [T7-T10] ($4,000 / Hire)</div>
+          <div class="pack-row">
+            <button class="btn" style="border-color:var(--status-amber); color:var(--status-amber);" onclick="buyResumes(3, 1)">Hire 1x</button>
+            <button class="btn" style="border-color:var(--status-amber); color:var(--status-amber);" onclick="buyResumes(3, 5)">Hire 5x</button>
+            <button class="btn btn-green" onclick="buyResumes(3, 10)">Hire 10x</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>Quarry Supply (Cut Stone, Mortar & Scaffolding)</span>
+        <span style="font-size:11px; font-weight:bold; color:var(--status-amber);">$<span id="fuel-price">0.25</span> / TON</span>
+      </div>
+      <div class="fraction-row">
+        <button class="btn" onclick="buyFuelFixed(500)">500 Tons</button>
+        <button class="btn" onclick="buyFuelFixed(2500)">2.5K Tons</button>
+        <button class="btn" onclick="buyFuelFixed(10000)">10K Tons</button>
+        <button class="btn btn-green" onclick="buyFuelFixed('MAX')">Max Quarry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: LANDMARK ESTATES (INVENTORY) -->
+  <div id="tab-fleet" class="view-tab">
+    <div class="panel">
+      <div class="panel-header">
+        <span>Active Architectural Landmarks</span>
+        <div style="display:flex; gap:4px;">
+          <button class="btn btn-green" onclick="autoAssignPilots()">Auto-Architect</button>
+          <button class="btn btn-green" onclick="autoAssignRoutes()">Auto-Expo</button>
+          <button class="btn btn-green" onclick="dispatchAll()">Open All</button>
+          <button class="btn" onclick="maintainAll()">Restore All</button>
+        </div>
+      </div>
+      
+      <div class="control-bar">
+        <div class="control-group">
+          <span class="control-label">Sort:</span>
+          <button class="btn" style="padding:4px 6px; font-size:8px;" onclick="sortHangar('val')">VAL</button>
+          <button class="btn" style="padding:4px 6px; font-size:8px;" onclick="sortHangar('tier')">TIER</button>
+          <button class="btn" style="padding:4px 6px; font-size:8px;" onclick="sortHangar('range')">HT</button>
+        </div>
+        <div class="control-group">
+          <span class="control-label">Style:</span>
+          <select id="fleet-role-filter" onchange="filterHangarRole(this.value)" style="padding:3px; font-size:9px; width:auto;">
+            <option value="ALL">All Architecture</option>
+            <option value="GOTHIC_CATHEDRAL">Gothic Cathedrals</option>
+            <option value="MEGA_CHURCH">Mega-Churches</option>
+            <option value="CITADEL_CASTLE">Castles & Keeps</option>
+            <option value="EASTERN_PAGODA">Pagodas & Tenshu</option>
+            <option value="SACRED_DOMES">Onion & Grand Domes</option>
+            <option value="ANCIENT_WONDER">Pyramids & Temples</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <span class="control-label">Tier:</span>
+          <select id="fleet-tier-filter" onchange="filterHangarTier(this.value)" style="padding:3px; font-size:9px; width:auto;">
+            <option value="ALL">All Tiers</option>
+            <option value="0">T1</option><option value="1">T2</option><option value="2">T3</option><option value="3">T4</option><option value="4">T5</option>
+            <option value="5">T6</option><option value="6">T7</option><option value="7">T8</option><option value="8">T9</option><option value="9">T10</option>
+          </select>
+        </div>
+        <button class="btn btn-green" style="padding:4px 6px; font-size:8px;" onclick="importStrain()">Import Base36</button>
+      </div>
+
+      <div class="fraction-row">
+        <button class="btn btn-danger" onclick="quickSellStrains(0)">Sell T1</button>
+        <button class="btn btn-danger" onclick="quickSellStrains(1)">Sell T2&lt;</button>
+        <button class="btn btn-danger" onclick="quickSellStrains(2)">Sell T3&lt;</button>
+        <button class="btn btn-danger" onclick="quickSellStrains(3)">Sell T4&lt;</button>
+      </div>
+
+      <div id="fleet-list" class="fleet-grid"></div>
+    </div>
+  </div>
+  
+  <!-- TAB: WONDER VAULT GALLERY -->
+  <div id="tab-gallery" class="view-tab">
+    <div class="panel">
+      <div class="panel-header"><span>World Heritage Wonder Vault 🏰</span></div>
+      <p style="font-size:10px; color:var(--silver-dim);">Lock your finest 512x512 3D Voxel Cathedrals, Mega-Churches, Castles & Wonders forever. Tap any building to rotate in 3D.</p>
+      <div id="gallery-grid" class="fleet-grid"></div>
+    </div>
+  </div>
+
+  <!-- TAB 4: ARCHITECTS -->
+  <div id="tab-pilots" class="view-tab">
+    <div class="panel">
+      <div class="panel-header"><span>Master Architect & Mason Roster</span></div>
+      
+      <div class="control-bar">
+        <div class="control-group">
+          <span class="control-label">Sort:</span>
+          <button class="btn" style="padding:4px 6px; font-size:8px;" onclick="sortPilots('val')">VAL</button>
+          <button class="btn" style="padding:4px 6px; font-size:8px;" onclick="sortPilots('tier')">TIER</button>
+        </div>
+        <div class="control-group">
+          <span class="control-label">Tier:</span>
+          <select id="pilot-tier-filter" onchange="filterPilotTier(this.value)" style="padding:3px; font-size:9px; width:auto;">
+            <option value="ALL">All Tiers</option>
+            <option value="0">T1</option><option value="1">T2</option><option value="2">T3</option><option value="3">T4</option><option value="4">T5</option>
+            <option value="5">T6</option><option value="6">T7</option><option value="7">T8</option><option value="8">T9</option><option value="9">T10</option>
+          </select>
+        </div>
+        <button class="btn btn-green" style="padding:4px 6px; font-size:8px;" onclick="importCourier()">Import Base36</button>
+      </div>
+
+      <div class="fraction-row">
+        <button class="btn btn-danger" onclick="quickSellPilots(0)">Release T1</button>
+        <button class="btn btn-danger" onclick="quickSellPilots(1)">Release T2&lt;</button>
+        <button class="btn btn-danger" onclick="quickSellPilots(2)">Release T3&lt;</button>
+        <button class="btn btn-danger" onclick="quickSellPilots(3)">Release T4&lt;</button>
+      </div>
+
+      <div id="pilots-grid" class="fleet-grid"></div>
+    </div>
+  </div>
+
+  <!-- TAB 5: WORLD EXPOS & TOURS -->
+  <div id="tab-routes" class="view-tab">
+    <div class="panel">
+      <div class="panel-header">
+        <span>Global Heritage Tours & Architecture Biennales (400)</span>
+        <select id="route-cat-filter" onchange="filterRouteCategory(this.value)" style="padding:3px; font-size:9px; width:auto;">
+          <option value="ALL">All Tours</option>
+          <option value="GOTHIC_CATHEDRAL">Cathedral Pilgrimage</option>
+          <option value="MEGA_CHURCH">Mega-Auditorium Broadcast</option>
+          <option value="CITADEL_CASTLE">Fortress & Castle Tour</option>
+          <option value="EASTERN_PAGODA">Imperial Pagoda Circuit</option>
+          <option value="SACRED_DOMES">Sacred Dome Biennale</option>
+          <option value="ANCIENT_WONDER">Ancient Wonder Expedition</option>
+        </select>
+      </div>
+      <div id="routes-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+  </div>
+
+  <!-- TAB 6: ESTATE AUCTIONS (UNTOUCHED CRAZY BIDDING WAR MECHANICS!) -->
+  <div id="tab-auction" class="view-tab">
+    <div class="panel">
+      <div class="panel-header"><span>Sovereign Landmark Auction House</span><span style="color:var(--status-amber);"><span id="auction-count">0</span>/10 LANES</span></div>
+      <p style="font-size:10px; color:var(--silver-dim);">10 live billionaire & preservation fund bidding lanes with overtime sniping and massive 2x–20x bidding war spikes.</p>
+      
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-green" style="flex:1; padding:8px;" onclick="fillAuctions('planes')">Auto-Fill 10 Cheapest Landmarks</button>
+        <button class="btn btn-green" style="flex:1; padding:8px;" onclick="fillAuctions('pilots')">Auto-Fill 10 Junior Draftsmen</button>
+      </div>
+
+      <div id="auction-idle" style="text-align:center; padding:16px; color:var(--silver-dim); font-size:11px;">Lanes empty. Consign landmarks to the auction block.</div>
+      <div id="auction-board" class="fleet-grid"></div>
+    </div>
+  </div>
+
+  <!-- TAB 7: COMMISSIONS & AUTOMATIONS -->
+  <div id="tab-checklist" class="view-tab">
+    <div class="panel">
+      <div class="panel-header">Preservation Automations</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div class="check-item">
+          <div><strong>Auto-Tourism Loop:</strong> Automatically re-opens landmarks for global tours upon completion.</div>
+          <button id="chk-autoloop" class="btn" onclick="toggleAutoLoop()">ENABLE</button>
+        </div>
+        <div class="check-item">
+          <div><strong>Auto Stonework Repointing:</strong> Automatically restores structural integrity if masonry drops below 45%.</div>
+          <button id="chk-automro" class="btn" onclick="toggleAutoMRO()">ENABLE</button>
+        </div>
+        <div class="check-item">
+          <div><strong>Auto Quarry Restock:</strong> Buys 2,500 Tons of stone when masonry supply drops below 500.</div>
+          <button id="chk-autorefuel" class="btn" onclick="toggleAutoRefuel()">ENABLE</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>Civic & Patron Commissions</span>
+        <button class="btn btn-green" style="padding:2px 6px; font-size:8px;" onclick="refreshSideMissions()">New Patrons</button>
+      </div>
+      <p style="font-size:10px; color:var(--silver-dim); margin-bottom:4px;">Showcase requested architectural styles at target biennales to claim patron endowments and bonus deeds.</p>
+      <div id="side-missions-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">Architectural Milestones</div>
+      <div id="milestone-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+  </div>
+
+  <!-- TAB 8: MASONRY TECH UPGRADES -->
+  <div id="tab-upgrades" class="view-tab">
+    <div class="panel">
+      <div class="panel-header">Engineering & Illumination Upgrades</div>
+      <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px; background:#000;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+          <span style="font-weight:bold; color:var(--status-green);">Architectural Projection-Mapping & Acoustics</span>
+          <span style="color:var(--silver-dim);">Lvl <span id="upg-mkt-lvl">0</span> (+<span id="upg-mkt-pct">0</span>%)</span>
+        </div>
+        <div style="font-size:9.5px; color:var(--silver-dim); margin-bottom:6px;">Permanently boosts world tour & ticket revenues by +5% per level.</div>
+        <button class="btn btn-green" style="width:100%;" onclick="buyUpgrade('mkt')">Upgrade ($<span id="upg-mkt-cost">250</span>)</button>
+      </div>
+      <div style="border:1px solid var(--panel-border); padding:8px; border-radius:3px; background:#000;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;">
+          <span style="color:var(--status-blue); font-weight:bold;">Seismic Base-Isolators & Titanium Trusses</span>
+          <span style="color:var(--silver-dim);">Lvl <span id="upg-eng-lvl">0</span> (-<span id="upg-eng-pct">0</span>%)</span>
+        </div>
+        <div style="font-size:9.5px; color:var(--silver-dim); margin-bottom:6px;">Permanently reduces Masonry maintenance consumption by 2% per level (Max 70%).</div>
+        <button class="btn" style="border-color:var(--status-blue); color:var(--status-blue); width:100%;" onclick="buyUpgrade('eng')">Upgrade ($<span id="upg-eng-cost">400</span>)</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 60 FPS 3D VOXEL ARCHITECTURE INSPECTOR MODAL -->
+<div id="voxel-modal" onclick="if(event.target.id==='voxel-modal') closeInspectModal()">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span id="modal-title" style="font-size:12px; font-weight:900; color:var(--status-amber);">3D Monument Inspector</span>
+      <div style="display:flex; gap:4px;">
+        <button class="btn btn-green" onclick="downloadInspectPNG()">💾 512 PNG</button>
+        <button class="btn btn-danger" onclick="closeInspectModal()">CLOSE ✕</button>
+      </div>
+    </div>
+    <canvas id="inspect-canvas" width="512" height="512"></canvas>
+    <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--silver-dim); font-family:monospace;">
+      <span id="modal-sub">Style: GOTHIC_CATHEDRAL</span>
+      <span>🖱️ Drag to Rotate 3D (60 FPS)</span>
+    </div>
+  </div>
+</div>
+
+<div id="toast-rack"></div>
+
+<script>
+  /* ================= 20,000 ARCHITECTURAL COMBINATIONS ================= */
+  // 10 Architectural Materials & Finishes (10)
+  const TREE_PREFIXES = [
+    "Carrara-Marble",    // 0: Gleaming white marble & gold leaf
+    "Gilded-Baroque",    // 1: Imperial gold & warm travertine stone
+    "Gothic-Limestone",  // 2: Weathered French limestone & slate roofs
+    "Obsidian-Basalt",   // 3: Dark volcanic fortress stone & crimson banners
+    "Red-Sandstone",     // 4: Mughal / Petra red sandstone & ivory domes
+    "Patina-Copper",     // 5: Oxidized verdigris mint-green copper roofs & pale stone
+    "Floodlit-Night",    // 6: Midnight stone with blazing golden floodlit windows
+    "Crystal-Glass",     // 7: Modern steel exoskeleton & sky-blue curtainwall glass
+    "Weathered-Ruin",    // 8: Moss-reclaimed ancient stone & ivy
+    "Imperial-Jade"      // 9: Celadon jade stone & burnished brass roofs
+  ]; // 10
+
+  // 10 Architectural Eras & Engineering Traditions (10) -> 10 x 10 x 20 x 10 Tiers = 20,000 Unique Landmarks!
+  const TREE_ORIGINS = [
+    "High-Gothic",       // 0
+    "Neo-Classical",     // 1
+    "Mega-Modern",       // 2
+    "Byzantine-Grand",   // 3
+    "Sengoku-Fortified", // 4
+    "Art-Deco-Spire",    // 5
+    "Romanesque",        // 6
+    "Renaissance",       // 7
+    "Mesoamerican",      // 8
+    "Imperial-Dynasty"   // 9
+  ]; // 10
+
+  // 20 Iconic World Buildings across Cathedrals, Mega-Churches, Castles, Pagodas, Onion Domes & Ancient Wonders
+  const TREE_SPECIES = [
+    // GOTHIC_CATHEDRAL (0..3)
+    "Notre-Dame Twin-Spire Cathedral",
+    "Cologne High-Gothic Basilica",
+    "Milan Duomo Marble Cathedral",
+    "Westminster Abbey Sanctuary",
+    // MEGA_CHURCH (4..6)
+    "Crystal Cathedral Glass Mega-Church",
+    "Grace Fellowship Stadium Auditorium",
+    "Cross-Spire Modern Mega-Sanctuary",
+    // CITADEL_CASTLE (7..10)
+    "Neuschwanstein Alpine Fairy-Castle",
+    "Krak des Chevaliers Crusader Keep",
+    "Bodiam Moated Curtain-Wall Castle",
+    "Dracula Poenari Dread-Citadel",
+    // EASTERN_PAGODA (11..13)
+    "Himeji White-Heron Tenshu Keep",
+    "Toji Five-Story Wooden Pagoda",
+    "Forbidden City Hall of Supreme Harmony",
+    // SACRED_DOMES (14..16)
+    "St. Basil's Polychrome Onion-Cathedral",
+    "Hagia Sophia Grand Minaret Dome",
+    "Taj Mahal Crown Marble Mausoleum",
+    // ANCIENT_WONDER (17..19)
+    "Chichen Itza Kukulkan Pyramid",
+    "Parthenon Acropolis Peristyle Temple",
+    "Great Ziggurat of Ur Sanctuary"
+  ]; // 20
+
+  // 6 Structural Archetypes
+  const TREE_STYLES = ["GOTHIC_CATHEDRAL", "MEGA_CHURCH", "CITADEL_CASTLE", "EASTERN_PAGODA", "SACRED_DOMES", "ANCIENT_WONDER"]; // 6
+
+  const P_FIRST = ["Antoni", "Frank", "Zaha", "I.M.", "Filippo", "Christopher", "Andrea", "Gian", "Le", "Norman", "Renzo", "Santiago", "Oscar", "Mies", "Eero", "Louis", "Kengo", "Tadao", "Sinan", "Imhotep"];
+  const P_LAST = ["Gaudi", "Wright", "Hadid", "Pei", "Brunelleschi", "Wren", "Palladio", "Bernini", "Corbusier", "Foster", "Piano", "Calatrava", "Niemeyer", "Rohe", "Saarinen", "Kahn", "Kuma", "Ando", "Michelangelo", "Vitruvius"];
+  const P_CALL = ["'Flying-Buttress'", "'Keystone'", "'Cantilever'", "'Rose-Window'", "'Golden-Ratio'", "'Vault-Master'", "'Master-Mason'", "'Dome-Builder'"];
+  const B_TYPES = ["ACOUSTICS","SPEED","MASONRY","LIGHTING"]; 
+
+  /* REALISTIC ARCHITECTURAL SCALE MODEL TO SOVEREIGN WONDER PRICES ($15 -> $250,000) */
+  const TIERS = [
+    { tier: 1, name: "Tier I: Blueprint Study", color: "var(--t0-col)", baseVal: 15 },
+    { tier: 2, name: "Tier II: Plaster Maquette", color: "var(--t1-col)", baseVal: 45 },
+    { tier: 3, name: "Tier III: Parish Sanctuary", color: "var(--t2-col)", baseVal: 120 },
+    { tier: 4, name: "Tier IV: Civic Pavilion", color: "var(--t3-col)", baseVal: 350 },
+    { tier: 5, name: "Tier V: Regional Landmark", color: "var(--t4-col)", baseVal: 950 },
+    { tier: 6, name: "Tier VI: Royal Stronghold", color: "var(--t5-col)", baseVal: 2800 },
+    { tier: 7, name: "Tier VII: National Cathedral", color: "var(--t6-col)", baseVal: 8500 },
+    { tier: 8, name: "Tier VIII: Mega-Sanctuary", color: "var(--t7-col)", baseVal: 25000 },
+    { tier: 9, name: "Tier IX: UNESCO Masterpiece", color: "var(--t8-col)", baseVal: 75000 },
+    { tier: 10, name: "Tier X: World Wonder", color: "var(--t9-col)", baseVal: 250000 }
+  ];
+
+  const ZONE_CAT = {
+    GOTHIC_CATHEDRAL: ["Chartres Cathedral Symposium","Paris Ile-de-la-Cite Expo","Cologne Rhine Biennale","Canterbury Heritage Tour"],
+    MEGA_CHURCH: ["Houston Stadium Summit","Orange County Glass Expo","Dallas Acoustic Con","Atlanta Broadcast Megaplex"],
+    CITADEL_CASTLE: ["Bavarian Alps Castle Tour","Loire Valley Chateaux Expo","Edinburgh Fortress Edinburgh","Rhine Gorge Citadel Show"],
+    EASTERN_PAGODA: ["Kyoto Imperial Preservation","Himeji Castle Festival","Nara Timber Temple Con","Beijing Palace Biennale"],
+    SACRED_DOMES: ["Red Square Architecture Expo","Istanbul Bosphorus Summit","Agra Marble Symposium","Venice St. Mark's Biennale"],
+    ANCIENT_WONDER: ["Athens Acropolis Colloquium","Yucatan Equinox Festival","Giza Plateau Symposium","Babylon Mesopotamia Con"]
+  };
+
+  const MILESTONES = [
+    { id: "m1", title: "Cornerstone Laid", desc: "Open your first landmark to a World Expo tour.", reward: 200, req: s => s.fleet.some(p => p.status === 'IN_FLIGHT' || p.expRev > 0) },
+    { id: "m2", title: "Architectural Firm", desc: "Hold 5 or more landmarks in your Estates.", reward: 500, req: s => s.fleet.length >= 5 },
+    { id: "m3", title: "Masons Guild", desc: "Hire 5 or more architects & engineers.", reward: 400, req: s => s.pilots.length >= 5 },
+    { id: "m4", title: "Continental Tour", desc: "Unlock a World Expo > 3,000 Miles.", reward: 1500, req: s => s.routes.some(r => r.unlocked && r.dist >= 3000) },
+    { id: "m5", title: "Sanctuary & Fortress", desc: "Acquire a MEGA_CHURCH or CITADEL_CASTLE.", reward: 1200, req: s => s.fleet.some(p => p.role === 'MEGA_CHURCH' || p.role === 'CITADEL_CASTLE') },
+    { id: "m6", title: "Regional Icon", desc: "Acquire a Tier V or higher landmark.", reward: 3000, req: s => s.fleet.some(p => p.tierIndex >= 4) },
+    { id: "m7", title: "Pritzker Fellow", desc: "Hire a Tier V or higher master mason.", reward: 2000, req: s => s.pilots.some(p => p.tierIndex >= 4) },
+    { id: "m8", title: "Marble Quarry", desc: "Stock over 25,000 Tons of Masonry.", reward: 1500, req: s => s.fuelReserve >= 25000 },
+    { id: "m9", title: "Endowment Trust", desc: "Amass over $100,000 in funds.", reward: 25000, req: s => s.funds >= 100000 },
+    { id: "m10", title: "Skyline Portfolio", desc: "Expand to 10 active landmarks.", reward: 3500, req: s => s.fleet.length >= 10 },
+    { id: "m11", title: "Sotheby's Gavel", desc: "Auction a landmark at the Estate Auctions.", reward: 1000, req: s => s.statAuctionsSold > 0 },
+    { id: "m12", title: "Deed Transfer", desc: "Transfer a property locally.", reward: 500, req: s => s.statPlanesScrapped > 0 },
+    { id: "m13", title: "Global Biennale", desc: "Unlock an exhibition > 6,500 Miles.", reward: 5000, req: s => s.routes.some(r => r.unlocked && r.dist >= 6500) },
+    { id: "m14", title: "Council of Starchitects", desc: "Employ 3 or more Tier VII+ Starchitects.", reward: 12000, req: s => s.pilots.filter(p => p.tierIndex >= 6).length >= 3 },
+    { id: "m15", title: "Seven Wonders", desc: "Acquire a Tier X World Wonder.", reward: 50000, req: s => s.fleet.some(p => p.tierIndex === 9) }
+  ];
+
+  const $ = id => document.getElementById(id);
+
+  /* ============================================================================
+     COMPACT 128x128x128 SPARSE 3D VOXEL ARCHITECTURE ENGINE (VoxelArchitectureEngine)
+     - 6 MB RAM footprint, ~2.5ms generation, 0 crashes
+     - 6 Detailed 3D Architectural Archetypes on Scenic Estates:
+       1. GOTHIC_CATHEDRAL: Twin spires, flying buttresses, cruciform nave & stained-glass rose window
+       2. MEGA_CHURCH: Fan-shaped glass stadium auditorium, cantilevered roof wings & illuminated cross tower
+       3. CITADEL_CASTLE: Water moat, drawbridge, 4 curtain walls, 4 corner drum towers & towering central keep
+       4. EASTERN_PAGODA: Sloped stone ishigaki walls, 5 tiered roofs with upturned eaves & golden sorin spire
+       5. SACRED_DOMES: Central basilica with 4 polychrome swirled Onion Domes & corner minarets
+       6. ANCIENT_WONDER: Stepped Mesoamerican Pyramid with 4 staircases OR Greek Doric Peristyle Temple
+     ============================================================================ */
+  class VoxelArchitectureEngine {
+    constructor(canvas) {
+      this.width = 512;
+      this.height = 512;
+      this.canvas = canvas || document.createElement('canvas');
+      this.canvas.width = 512;
+      this.canvas.height = 512;
+      this.ctx = this.canvas.getContext('2d');
+
+      this.DIM = 128;
+      this.grid = new Uint8Array(128 * 128 * 128);
+      this.stampGrid = new Uint16Array(128 * 128 * 128);
+      this.currentStamp = 1;
+
+      this.occupiedList = new Int32Array(300000);
+      this.occupiedCount = 0;
+
+      const MAX_SURF = 190000;
+      this.surfX = new Int16Array(MAX_SURF);
+      this.surfY = new Int16Array(MAX_SURF);
+      this.surfZ = new Int16Array(MAX_SURF);
+      this.surfColTop = new Uint32Array(MAX_SURF);
+      this.surfColLeft = new Uint32Array(MAX_SURF);
+      this.surfColRight = new Uint32Array(MAX_SURF);
+      this.surfCount = 0;
+
+      this.zBuf = new Float32Array(512 * 512);
+      this.imgData = this.ctx.createImageData(512, 512);
+      this.pixels = new Uint32Array(this.imgData.data.buffer);
+
+      this.paletteRGB = new Uint32Array(256);
+      this.materialPriority = new Uint8Array(256);
+      this.isEmissive = new Uint8Array(256);
+
+      this.yaw = 0.52;
+      this.pitch = 0.34;
+      this.scale = 3.85;
+      this.seed = 2026;
+    }
+
+    initRNG(seed) {
+      this.seed = (seed >>> 0) || 2026;
+      let a = this.seed;
+      this.rand = () => {
+        let t = (a += 0x6D2B79F5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    range(min, max) { return min + this.rand() * (max - min); }
+    pick(arr) { return arr[Math.floor(this.rand() * arr.length)]; }
+
+    registerColor(idx, hex, priority, emissive = 0) {
+      this.paletteRGB[idx] = parseInt(hex.slice(1), 16);
+      this.materialPriority[idx] = priority;
+      this.isEmissive[idx] = emissive;
+    }
+
+    setupArchitecturePalette(sp, role, tierIdx, prefixIdx = 0, originIdx = 0) {
+      this.prefixIdx = prefixIdx;
+      this.originIdx = originIdx;
+      this.isEmissive.fill(0);
+
+      // 10..15: Primary Masonry / Stone / Curtainwall
+      // 20..25: Secondary Roofs / Spires / Domes / Copper / Gold
+      // 30..35: Trim / Columns / Buttresses / Timber Framing
+      let walls = ['#59554d', '#736e64', '#8f897d', '#aba496', '#c7bfb0', '#e3dcd0']; // Limestone
+      let roofs = ['#1c2833', '#293b4a', '#385063', '#496880', '#5e839e', '#7aa3bf']; // Slate Blue-Grey
+      let trim  = ['#3d3934', '#544f48', '#6e675f', '#8a8278', '#a89f94', '#c7bdb2'];
+
+      if (prefixIdx === 0 || sp.includes("Taj") || sp.includes("Milan") || sp.includes("Parthenon")) {
+        // CARRARA MARBLE & GOLD
+        walls = ['#7a7d82', '#969a9e', '#b4b8bd', '#cfd4d9', '#e8ecf0', '#ffffff'];
+        roofs = ['#4d380a', '#785810', '#a67b19', '#d49f24', '#f5c43b', '#ffe680'];
+      } else if (prefixIdx === 1) {
+        // GILDED BAROQUE
+        walls = ['#5c4728', '#7d6138', '#9e7c49', '#bf985c', '#dfb673', '#f7d494'];
+        roofs = ['#593e08', '#875e0d', '#b88214', '#e6a61f', '#ffd03b', '#fff08c'];
+      } else if (prefixIdx === 3 || sp.includes("Dracula")) {
+        // OBSIDIAN BASALT & CRIMSON ROOFS
+        walls = ['#121317', '#1e2026', '#2c2f38', '#3d414d', '#505666', '#676e82'];
+        roofs = ['#38080c', '#5e0e14', '#87161f', '#b5212d', '#de3543', '#ff6673'];
+      } else if (prefixIdx === 4 || sp.includes("Basil")) {
+        // RED SANDSTONE & POLYCHROME DOMES
+        walls = ['#421912', '#61261b', '#823426', '#a64533', '#c95b47', '#eb7c68'];
+        roofs = ['#0d3826', '#165e40', '#22875c', '#32b27b', '#4cde9e', '#85ffc7'];
+      } else if (prefixIdx === 5) {
+        // PATINA VERDIGRIS COPPER ROOFS
+        walls = ['#544f46', '#706a5e', '#8f8779', '#ada494', '#ccc2b0', '#ebe1cf'];
+        roofs = ['#0d332a', '#175446', '#237864', '#339e85', '#4bc7aa', '#78edd1'];
+      } else if (prefixIdx === 7 || role === 'MEGA_CHURCH') {
+        // CRYSTAL GLASS & TITANIUM STEEL
+        walls = ['#142c47', '#1f446e', '#2d6099', '#4080c7', '#5ca3f2', '#94c9ff'];
+        roofs = ['#4a525d', '#687382', '#8896a8', '#aab8cc', '#cad6e8', '#edf4fc'];
+      } else if (prefixIdx === 9 || role === 'EASTERN_PAGODA') {
+        // IMPERIAL JADE & PLUM TIMBER
+        walls = ['#78756e', '#99958c', '#bab5ab', '#d9d4c9', '#f0ece1', '#ffffff'];
+        roofs = ['#182624', '#263d3a', '#385753', '#4c7570', '#659690', '#85bab3'];
+        trim  = ['#4a1212', '#6e1b1b', '#962626', '#bf3434', '#e34b4b', '#ff7373'];
+      }
+
+      // 1..9: Architectural Diorama Plinth, Manicured Lawn, Paved Plaza, Water Moat & Trees (Priority 7)
+      this.registerColor(1, '#0c0e12', 7, 0); // Ebony architectural plinth base
+      this.registerColor(2, '#181c24', 7, 0); // Plinth bevel
+      this.registerColor(3, '#1e3618', 7, 0); // Estate lawn shadow
+      this.registerColor(4, '#2d5224', 7, 0); // Estate lawn mid
+      this.registerColor(5, '#8c857B', 7, 0); // Travertine stone plaza pavers
+      this.registerColor(6, '#10385c', 7, 0); // Castle moat / Reflecting pool water
+      this.registerColor(7, '#226699', 7, 0); // Water ripple highlight
+      this.registerColor(8, '#3d7029', 7, 0); // Cypress / Hedge tree foliage
+      this.registerColor(9, '#d4a838', 7, 0); // Brass landmark plaque
+
+      // 10..15: Primary Masonry Walls (Priority 5)
+      walls.forEach((c, i) => this.registerColor(10 + i, c, 5, 0));
+      // 20..25: Secondary Roofs / Domes / Spires (Priority 5)
+      roofs.forEach((c, i) => this.registerColor(20 + i, c, 5, 0));
+      // 30..35: Structural Trim / Buttresses / Columns (Priority 5)
+      trim.forEach((c, i) => this.registerColor(30 + i, c, 5, 0));
+
+      // 40..47: Stained-Glass Rose Windows, Illuminated Sanctuary Windows & Polychrome Onion Domes (Priority 6, Emissive!)
+      this.registerColor(40, '#ffcf47', 6, 1); // Warm floodlit sanctuary window / Gold cross
+      this.registerColor(41, '#ffffff', 6, 1); // Brilliant floodlight core
+      this.registerColor(42, '#38bdf8', 6, 1); // Stained-glass sapphire blue
+      this.registerColor(43, '#ef4444', 6, 1); // Stained-glass ruby red / Onion dome stripe
+      this.registerColor(44, '#a855f7', 6, 1); // Stained-glass amethyst violet
+      this.registerColor(45, '#10b981', 6, 1); // Polychrome emerald dome stripe
+      this.registerColor(46, '#f97316', 6, 1); // Amber dome / Torchlight
+      this.registerColor(47, '#1a1c20', 6, 0); // Dark recessed lancet arch / Portcullis iron
+    }
+
+    setVoxel(x, y, z, colorIdx) {
+      const ix = x | 0, iy = y | 0, iz = z | 0;
+      if (ix < 2 || ix >= 126 || iy < 2 || iy >= 126 || iz < 2 || iz >= 126) return;
+      const idx = ix + (iz << 7) + (iy << 14);
+      if (this.stampGrid[idx] === this.currentStamp) {
+        const existing = this.grid[idx];
+        if (this.materialPriority[existing] > this.materialPriority[colorIdx]) return;
+        this.grid[idx] = colorIdx;
+      } else {
+        this.stampGrid[idx] = this.currentStamp;
+        this.grid[idx] = colorIdx;
+        if (this.occupiedCount < this.occupiedList.length) {
+          this.occupiedList[this.occupiedCount++] = idx;
+        }
+      }
+    }
+
+    fillBox(x0, y0, z0, x1, y1, z1, baseCol, span = 6) {
+      const ax0 = Math.max(2, Math.floor(Math.min(x0, x1)));
+      const ax1 = Math.min(125, Math.ceil(Math.max(x0, x1)));
+      const ay0 = Math.max(2, Math.floor(Math.min(y0, y1)));
+      const ay1 = Math.min(125, Math.ceil(Math.max(y0, y1)));
+      const az0 = Math.max(2, Math.floor(Math.min(z0, z1)));
+      const az1 = Math.min(125, Math.ceil(Math.max(z0, z1)));
+
+      for (let y = ay0; y <= ay1; y++) {
+        const ny = (y - ay0) / Math.max(1, ay1 - ay0);
+        for (let z = az0; z <= az1; z++) {
+          for (let x = ax0; x <= ax1; x++) {
+            const course = ((y & 3) === 0 && ((x + z) & 3) === 0) ? -1 : 0;
+            const shade = span > 1 ? Math.max(0, Math.min(span - 1, Math.floor(ny * (span - 1)) + course)) : 0;
+            this.setVoxel(x, y, z, baseCol + shade);
+          }
+        }
+      }
+    }
+
+    fillCylinder(cx, y0, cz, r, h, baseCol, span = 6) {
+      const rInt = Math.ceil(r);
+      const rSq = r * r;
+      for (let dy = 0; dy <= h; dy++) {
+        const ny = dy / Math.max(1, h);
+        for (let dz = -rInt; dz <= rInt; dz++) {
+          for (let dx = -rInt; dx <= rInt; dx++) {
+            const d2 = dx * dx + dz * dz;
+            if (d2 <= rSq) {
+              const shade = span > 1 ? Math.min(span - 1, Math.floor((ny * 0.65 + (1 - d2 / rSq) * 0.35) * span)) : 0;
+              this.setVoxel(cx + dx, y0 + dy, cz + dz, baseCol + shade);
+            }
+          }
+        }
+      }
+    }
+
+    /**
+     * Builds the Architectural Estate Plinth (with Moat for Castles, Reflecting Pool for Domes, or Stone Plaza)
+     */
+    buildEstatePlinth(role) {
+      const cx = 64, cz = 64;
+      const groundY = 16;
+
+      for (let y = 8; y <= groundY; y++) {
+        const bevel = (groundY - y) * 0.4;
+        const rx = 54 + bevel, rz = 54 + bevel;
+
+        for (let z = Math.floor(cz - rz); z <= Math.ceil(cz + rz); z++) {
+          for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
+            const dx = Math.abs(x - cx), dz = Math.abs(z - cz);
+            if (dx > rx || dz > rz) continue;
+
+            if (dx > rx - 3 || dz > rz - 3 || y < 14) {
+              const isPlaque = (z > cz + rz - 2 && dx < 16 && y >= 10 && y <= 13);
+              this.setVoxel(x, y, z, isPlaque ? 9 : (y === 13 ? 2 : 1));
+            } else if (role === 'CITADEL_CASTLE' && (dx > 36 || dz > 36) && dx < 48 && dz < 48) {
+              // Castle Water Moat + Front Stone Drawbridge
+              if (z > cz && dx < 8) {
+                this.setVoxel(x, y, z, 5); // Stone causeway bridge
+              } else {
+                this.setVoxel(x, y, z, ((x + z) & 1) ? 6 : 7);
+              }
+            } else if (role === 'SACRED_DOMES' && dx < 10 && z > cz + 18 && z < cz + 48) {
+              // Taj Mahal / Cathedral Reflecting Pool in front!
+              this.setVoxel(x, y, z, ((x + z) & 1) ? 6 : 7);
+            } else if (dx < 38 && dz < 42) {
+              // Travertine Stone Plaza Pavers
+              this.setVoxel(x, y, z, ((x ^ z) & 1) ? 5 : 4);
+            } else {
+              // Manicured Estate Lawn
+              this.setVoxel(x, y, z, ((x + z) & 1) ? 4 : 3);
+            }
+          }
+        }
+      }
+
+      // manicured Cypress Trees along the estate perimeter
+      for (const sx of [20, 108]) {
+        for (const sz of [24, 64, 104]) {
+          for (let h = 1; h <= 9; h++) {
+            this.fillCylinder(sx, groundY + h, sz, Math.max(1, 3.2 * (1 - h / 11)), 1, 8, 1);
+          }
+        }
+      }
+
+      return groundY;
+    }
+
+    /**
+     * 1. GOTHIC_CATHEDRAL (Twin Spires, Cruciform Nave, Pitched Roof, Flying Buttresses & Stained-Glass Rose Window)
+     */
+    buildGothicCathedral(baseY) {
+      const cx = 64, cz = 64;
+
+      // 1. Cruciform Nave (Z = 24..96) & Transept Wings (X = 28..100)
+      const naveW = 16, naveH = 38;
+      this.fillBox(cx - naveW, baseY + 1, 24, cx + naveW, baseY + naveH, 94, 10, 6);
+      // Transept cross-wings
+      this.fillBox(28, baseY + 1, 46, 100, baseY + naveH - 2, 68, 10, 6);
+
+      // Pitched Gable Roof over Nave & Transept
+      for (let r = 0; r <= naveW; r++) {
+        this.fillBox(cx - (naveW - r), baseY + naveH + r, 24, cx + (naveW - r), baseY + naveH + r + 1, 94, 20, 6);
+        if (r <= 11) {
+          this.fillBox(28, baseY + naveH - 2 + r, 57 - (11 - r), 100, baseY + naveH - 1 + r, 57 + (11 - r), 20, 6);
+        }
+      }
+
+      //Central Crossing Fleche Spire
+      for (let h = 0; h <= 28; h++) {
+        this.fillCylinder(cx, baseY + naveH + 14 + h, 57, Math.max(1.0, 5.5 * (1 - h / 28)), 1, 20, 6);
+      }
+
+      // 2. Flying Buttresses & Pinnacles along both sides of the Nave!
+      for (let bz = 30; bz <= 84; bz += 10) {
+        if (bz >= 44 && bz <= 70) continue; // Skip transept crossing
+        for (const side of [-1, 1]) {
+          const pierX = cx + side * (naveW + 10);
+          // Outer buttress pier + pinnacle spire
+          this.fillBox(pierX - 2, baseY + 1, bz - 2, pierX + 2, baseY + naveH + 4, bz + 2, 30, 6);
+          // Two-tier Flying Buttress Arches bridging from outer pier to high nave clerestory wall!
+          for (let s = 0; s <= 10; s++) {
+            const t = s / 10;
+            const ax = pierX - side * (s);
+            const ay1 = baseY + 18 + Math.sin(t * Math.PI * 0.6) * 10;
+            const ay2 = baseY + 28 + Math.sin(t * Math.PI * 0.6) * 10;
+            this.fillBox(ax, ay1, bz - 1, ax + 1, ay1 + 2, bz + 1, 30, 6);
+            this.fillBox(ax, ay2, bz - 1, ax + 1, ay2 + 2, bz + 1, 30, 6);
+          }
+          // Illuminated stained-glass clerestory lancet window between buttresses
+          this.fillBox(cx + side * naveW, baseY + 14, bz + 3, cx + side * naveW + side, baseY + 32, bz + 7, 42 + ((bz >> 2) % 3), 1);
+        }
+      }
+
+      // 3. West Facade Twin Towers (at Z = 86..98), 3 Gothic Portals & Stained-Glass Rose Window!
+      for (const side of [-1, 1]) {
+        const tx = cx + side * 15;
+        this.fillBox(tx - 8, baseY + 1, 84, tx + 8, baseY + 64, 98, 10, 6);
+        // Openwork Gothic Spire rising to Y = 116!
+        for (let h = 0; h <= 42; h++) {
+          const w = Math.max(1.0, 8.0 * (1 - h / 42));
+          this.fillBox(tx - w, baseY + 64 + h, 91 - w, tx + w, baseY + 65 + h, 91 + w, 20, 6);
+        }
+      }
+
+      // 3 Recessed Gothic Portals at base of West Facade
+      for (const px of [cx - 14, cx, cx + 14]) {
+        this.fillBox(px - 4, baseY + 1, 96, px + 4, baseY + 14, 99, 30, 6);
+        this.fillBox(px - 2, baseY + 1, 97, px + 2, baseY + 11, 99, 47, 1);
+      }
+
+      // Great Stained-Glass Rose Window in center of West Facade!
+      const roseY = baseY + 32, roseR = 8.5;
+      for (let dy = -roseR; dy <= roseR; dy++) {
+        for (let dx = -roseR; dx <= roseR; dx++) {
+          const d = Math.hypot(dx, dy);
+          if (d <= roseR) {
+            const ang = Math.atan2(dy, dx);
+            const petal = Math.floor(((ang + Math.PI) / (Math.PI * 2)) * 12) % 3;
+            const col = d > roseR - 1.5 ? 34 : (d < 2.5 ? 41 : 42 + petal);
+            this.setVoxel(cx + dx, roseY + dy, 96, col);
+            this.setVoxel(cx + dx, roseY + dy, 95, col);
+          }
+        }
+      }
+    }
+
+    /**
+     * 2. MEGA_CHURCH (Modern Fan-Shaped Glass Stadium Auditorium, Cantilevered Acoustic Roof & Towering Illuminated Cross Spire)
+     */
+    buildMegaChurch(baseY) {
+      const cx = 64, cz = 60;
+
+      // 1. Wide Sweeping Fan-Shaped Glass & Steel Auditorium
+      const maxH = 38;
+      for (let y = baseY + 1; y <= baseY + maxH; y++) {
+        const t = (y - baseY) / maxH;
+        // Cantilevered roof slopes upward toward the front apex!
+        const radX = 46 - t * 6;
+        const radZ = 36 - t * 4;
+
+        for (let dz = -radZ; dz <= radZ; dz++) {
+          const roofSlopeY = baseY + 26 + (dz + radZ) * 0.25;
+          if (y > roofSlopeY) continue;
+
+          for (let dx = -radX; dx <= radX; dx++) {
+            const d = Math.hypot(dx / radX, dz / radZ);
+            if (d > 1.0) continue;
+
+            const isRoof = y >= roofSlopeY - 2;
+            const isWall = d > 0.88;
+            if (!isRoof && !isWall) continue;
+
+            if (isRoof) {
+              // Ribbed white/silver acoustic stadium roof
+              const rib = (Math.abs(dx) % 6 === 0) ? 25 : 23;
+              this.setVoxel(cx + dx, y, cz + dz, rib);
+            } else {
+              // Structural steel diagrid + illuminated glass curtainwall!
+              const isMullion = (Math.abs(dx + y) % 7 === 0) || (Math.abs(dx - y) % 7 === 0) || (y % 8 === 0);
+              const isLitLobby = (dz > 10 && y < baseY + 16 && !isMullion);
+              this.setVoxel(cx + dx, y, cz + dz, isMullion ? 34 : (isLitLobby ? 40 : 13));
+            }
+          }
+        }
+      }
+
+      // 2. Cantilevered Entry Canopy & Grand Glass Atrium
+      this.fillBox(cx - 22, baseY + 14, cz + 30, cx + 22, baseY + 17, cz + 44, 24, 2);
+      this.fillCylinder(cx - 18, baseY + 1, cz + 40, 2.0, 14, 34, 2);
+      this.fillCylinder(cx + 18, baseY + 1, cz + 40, 2.0, 14, 34, 2);
+
+      // 3. Towering 100-Voxel Modern Steel Bell-Spire & Blazing Illuminated Cross!
+      const towerX = cx + 28, towerZ = cz + 26;
+      this.fillBox(towerX - 4, baseY + 1, towerZ - 4, towerX + 4, baseY + 76, towerZ + 4, 32, 4);
+      // Giant Glowing Cross at the apex (Y = 76..106)
+      this.fillBox(towerX - 2, baseY + 74, towerZ - 2, towerX + 2, baseY + 104, towerZ + 2, 40, 1);
+      this.fillBox(towerX - 11, baseY + 88, towerZ - 2, towerX + 11, baseY + 92, towerZ + 2, 40, 1);
+      this.fillBox(towerX - 1, baseY + 75, towerZ + 2, towerX + 1, baseY + 103, towerZ + 3, 41, 1);
+    }
+
+    /**
+     * 3. CITADEL_CASTLE (Moated Curtain Walls, 4 Corner Drum Towers, Gatehouse & Multi-Spire Central Keep)
+     */
+    buildCitadelCastle(baseY) {
+      const cx = 64, cz = 64;
+      const w = 32;
+      const wallH = 28;
+
+      // 1. 4 Crenellated Curtain Walls + Merlons
+      this.fillBox(cx - w, baseY + 1, cz - w, cx + w, baseY + wallH, cz - w + 5, 10, 6);
+      this.fillBox(cx - w, baseY + 1, cz + w - 5, cx + w, baseY + wallH, cz + w, 10, 6);
+      this.fillBox(cx - w, baseY + 1, cz - w, cx - w + 5, baseY + wallH, cz + w, 10, 6);
+      this.fillBox(cx + w - 5, baseY + 1, cz - w, cx + w, baseY + wallH, cz + w, 10, 6);
+
+      // Crenellated parapet teeth along all walls
+      for (let i = -w; i <= w; i += 4) {
+        this.fillBox(cx + i, baseY + wallH + 1, cz + w - 2, cx + i + 2, baseY + wallH + 4, cz + w + 1, 30, 6);
+        this.fillBox(cx + i, baseY + wallH + 1, cz - w - 1, cx + i + 2, baseY + wallH + 4, cz - w + 2, 30, 6);
+      }
+
+      // 2. 4 Corner Drum Towers with Conical Spire Roofs
+      for (const [tx, tz] of [[cx - w, cz - w], [cx + w, cz - w], [cx - w, cz + w], [cx + w, cz + w]]) {
+        this.fillCylinder(tx, baseY + 1, tz, 9.5, 42, 10, 6);
+        this.fillCylinder(tx, baseY + 42, tz, 11.0, 4, 30, 6);
+        for (let r = 0; r <= 16; r++) {
+          this.fillCylinder(tx, baseY + 46 + r, tz, 10.5 * (1 - r / 16), 1, 20, 6);
+        }
+      }
+
+      // 3. Twin-Tower Barbican Gatehouse & Iron Portcullis
+      this.fillBox(cx - 11, baseY + 1, cz + w - 6, cx + 11, baseY + 36, cz + w + 4, 30, 6);
+      this.fillBox(cx - 5, baseY + 1, cz + w - 5, cx + 5, baseY + 18, cz + w + 5, 47, 1);
+
+      // 4. Towering Fairy-Tale Central Keep + 2 Flanking Turrets!
+      this.fillBox(cx - 16, baseY + 1, cz - 16, cx + 16, baseY + 64, cz + 14, 10, 6);
+      // Warm torchlit banquet hall windows
+      for (const wx of [cx - 8, cx, cx + 8]) {
+        this.fillBox(wx - 2, baseY + 44, cz + 14, wx + 2, baseY + 54, cz + 15, 40, 1);
+      }
+      // Steep Pitched Keep Roof + High Watchtower Spire reaching Y = 116!
+      for (let r = 0; r <= 18; r++) {
+        const s = 17 * (1 - r / 18);
+        this.fillBox(cx - s, baseY + 64 + r, cz - 16, cx + s, baseY + 65 + r, cz + 14, 20, 6);
+      }
+      this.fillCylinder(cx + 12, baseY + 30, cz - 12, 6.5, 56, 10, 6);
+      for (let r = 0; r <= 18; r++) {
+        this.fillCylinder(cx + 12, baseY + 86 + r, cz - 12, 7.5 * (1 - r / 18), 1, 20, 6);
+      }
+    }
+
+    /**
+     * 4. EASTERN_PAGODA (Sloped Stone Ishigaki Wall + 5-Story Pagoda / Himeji Tenshu with Upturned Corner Eaves)
+     */
+    buildEasternPagoda(baseY) {
+      const cx = 64, cz = 64;
+
+      // 1. Sloped Batter-Walled Stone Ishigaki Fortress Foundation (Y = baseY..baseY + 22)
+      for (let y = 0; y <= 20; y++) {
+        const t = y / 20;
+        const w = 36 - Math.pow(t, 1.4) * 10;
+        this.fillBox(cx - w, baseY + 1 + y, cz - w, cx + w, baseY + 2 + y, cz + w, 30, 6);
+      }
+
+      // 2. 5 Tapering Pagoda / Tenshu Stories with Sweeping Upturned Corner Eaves!
+      let curY = baseY + 21;
+      for (let tier = 0; tier < 5; tier++) {
+        const t = tier / 4;
+        const wallW = Math.round(22 * (1 - t * 0.48));
+        const storyH = 11;
+
+        // White plastered timber-framed core walls + crimson pillars
+        this.fillBox(cx - wallW, curY, cz - wallW, cx + wallW, curY + storyH, cz + wallW, 10, 6);
+        this.fillBox(cx - wallW - 1, curY, cz - wallW - 1, cx + wallW + 1, curY + 2, cz + wallW + 1, 30, 6);
+
+        // Sweeping Upturned Eave Roof (curves upward at the 4 corners!)
+        const eaveW = wallW + 9;
+        const roofBaseY = curY + storyH;
+        for (let dz = -eaveW; dz <= eaveW; dz++) {
+          for (let dx = -eaveW; dx <= eaveW; dx++) {
+            const maxD = Math.max(Math.abs(dx), Math.abs(dz));
+            if (maxD > eaveW) continue;
+            const cornerDist = Math.hypot(dx, dz) / (eaveW * 1.414);
+            // Upturned corner curve (`cornerLift`) + pitched roof slope (`slopeY`)
+            const slopeY = Math.max(0, (eaveW - maxD) * 0.55);
+            const cornerLift = cornerDist > 0.72 ? Math.pow((cornerDist - 0.72) / 0.28, 2) * 5.5 : 0;
+            const ry = Math.round(roofBaseY + slopeY + cornerLift);
+
+            this.setVoxel(cx + dx, ry, cz + dz, maxD >= eaveW - 1 ? 34 : 22);
+            this.setVoxel(cx + dx, ry + 1, cz + dz, 24);
+          }
+        }
+        curY += storyH + 5;
+      }
+
+      // 3. Golden Sorin Finial Spire crowning the top roof!
+      this.fillCylinder(cx, curY, cz, 2.2, 18, 40, 1);
+    }
+
+    /**
+     * 5. SACRED_DOMES (St. Basil's Polychrome Onion Domes, Hagia Sophia & Taj Mahal)
+     */
+    buildSacredDomes(baseY) {
+      const cx = 64, cz = 64;
+
+      // Helper to carve a 3D Bulbous Swirled Onion Dome at (ox, oy, oz)
+      const carveOnionDome = (ox, oy, oz, maxR, h, isPolychrome) => {
+        for (let dy = 0; dy <= h; dy++) {
+          const t = dy / h; // 0 = drum base -> 0.38 = widest belly -> 1.0 = spire point
+          const profile = t < 0.42
+            ? Math.sin((t / 0.42) * Math.PI * 0.5) * 1.15
+            : Math.pow(1 - (t - 0.42) / 0.58, 1.45) * 1.15;
+          const r = Math.max(0.8, maxR * profile);
+          const rInt = Math.ceil(r);
+          const rSq = r * r;
+
+          for (let dz = -rInt; dz <= rInt; dz++) {
+            for (let dx = -rInt; dx <= rInt; dx++) {
+              if (dx * dx + dz * dz <= rSq) {
+                if (isPolychrome) {
+                  // Swirled St. Basil's helical rib stripes!
+                  const ang = Math.atan2(dz, dx);
+                  const stripe = Math.floor(((ang + Math.PI) / (Math.PI * 2)) * 8 + dy * 0.25) % 4;
+                  const col = stripe === 0 ? 43 : (stripe === 1 ? 40 : (stripe === 2 ? 45 : 42));
+                  this.setVoxel(ox + dx, oy + dy, oz + dz, col);
+                } else {
+                  this.setVoxel(ox + dx, oy + dy, oz + dz, 20 + Math.min(5, Math.floor(t * 6)));
+                }
+              }
+            }
+          }
+        }
+        // Golden Orthodox / Crescent Finial on top
+        this.fillCylinder(ox, oy + h, oz, 1.0, 6, 40, 1);
+      };
+
+      // 1. Main Sanctuary Basilica Cube & Arched Portals
+      this.fillBox(cx - 24, baseY + 1, cz - 24, cx + 24, baseY + 42, cz + 24, 10, 6);
+      this.fillBox(cx - 8, baseY + 1, cz + 22, cx + 8, baseY + 24, cz + 26, 30, 6);
+      this.fillBox(cx - 5, baseY + 1, cz + 23, cx + 5, baseY + 18, cz + 26, 47, 1);
+
+      // 2. Towering Central Drum & Master Onion Dome
+      this.fillCylinder(cx, baseY + 42, cz, 12.5, 22, 10, 6);
+      carveOnionDome(cx, baseY + 64, cz, 14.5, 28, true);
+
+      // 3. 4 Surrounding Octagonal Chapels with Polychrome Onion Domes!
+      const offsets = [[-22, 0], [22, 0], [0, -22], [0, 22]];
+      for (const [dx, dz] of offsets) {
+        this.fillCylinder(cx + dx, baseY + 1, cz + dz, 8.5, 48, 10, 6);
+        carveOnionDome(cx + dx, baseY + 49, cz + dz, 9.5, 20, true);
+      }
+
+      // 4. 4 Slender Corner Minarets (at +/-34, +/-34)
+      for (const [mx, mz] of [[-34, -34], [34, -34], [-34, 34], [34, 34]]) {
+        this.fillCylinder(cx + mx, baseY + 1, cz + mz, 3.8, 62, 10, 6);
+        this.fillCylinder(cx + mx, baseY + 48, cz + mz, 5.2, 3, 30, 6); // Balcony ring
+        carveOnionDome(cx + mx, baseY + 63, cz + mz, 4.2, 12, false);
+      }
+    }
+
+    /**
+     * 6. ANCIENT_WONDER (Chichen Itza Stepped Pyramid with 4 Grand Staircases OR Parthenon Greek Peristyle Temple)
+     */
+    buildAncientWonder(sp, baseY) {
+      const cx = 64, cz = 64;
+
+      if (sp.includes("Parthenon") || sp.includes("Temple")) {
+        // Classical Greek Peristyle Temple (Parthenon)
+        // 3-Step Marble Stylobate Platform
+        this.fillBox(cx - 38, baseY + 1, cz - 44, cx + 38, baseY + 8, cz + 44, 10, 6);
+
+        // Inner Cella Sanctuary Chamber
+        this.fillBox(cx - 22, baseY + 9, cz - 30, cx + 22, baseY + 38, cz + 30, 30, 6);
+
+        // 28 Fluted Doric Perimeter Columns!
+        for (let x = cx - 34; x <= cx + 34; x += 11) {
+          this.fillCylinder(x, baseY + 9, cz + 40, 2.8, 30, 10, 6);
+          this.fillCylinder(x, baseY + 9, cz - 40, 2.8, 30, 10, 6);
+        }
+        for (let z = cz - 29; z <= cz + 29; z += 11) {
+          this.fillCylinder(cx - 34, baseY + 9, z, 2.8, 30, 10, 6);
+          this.fillCylinder(cx + 34, baseY + 9, z, 2.8, 30, 10, 6);
+        }
+
+        // Entablature Architrave, Triglyph Frieze & Triangular Pediment Roof
+        this.fillBox(cx - 37, baseY + 39, cz - 43, cx + 37, baseY + 46, cz + 43, 10, 6);
+        for (let r = 0; r <= 16; r++) {
+          const w = 38 * (1 - r / 16);
+          this.fillBox(cx - w, baseY + 46 + r, cz - 43, cx + w, baseY + 47 + r, cz + 43, 20, 6);
+        }
+        return;
+      }
+
+      // 9-Tier Stepped Mesoamerican Pyramid (Chichen Itza / Great Ziggurat) + 4 Grand Balustraded Staircases!
+      const tiers = 9;
+      let curY = baseY + 1;
+      for (let t = 0; t < tiers; t++) {
+        const w = 44 - t * 4;
+        const h = 7;
+        this.fillBox(cx - w, curY, cz - w, cx + w, curY + h, cz + w, 10, 6);
+        this.fillBox(cx - w - 1, curY + h - 1, cz - w - 1, cx + w + 1, curY + h, cz + w + 1, 30, 6);
+        curY += h;
+      }
+
+      // 4 Grand Axial Staircases with Serpent Balustrades climbing from ground to summit!
+      for (let s = 0; s < 63; s++) {
+        const reach = 47 - s * 0.55;
+        const sy = baseY + 1 + s;
+        // North & South staircases
+        this.fillBox(cx - 6, baseY + 1, cz + reach, cx + 6, sy, cz + reach + 1, 30, 6);
+        this.fillBox(cx - 6, baseY + 1, cz - reach - 1, cx + 6, sy, cz - reach, 30, 6);
+        // East & West staircases
+        this.fillBox(cx + reach, baseY + 1, cz - 6, cx + reach + 1, sy, cz + 6, 30, 6);
+        this.fillBox(cx - reach - 1, baseY + 1, cz - 6, cx - reach, sy, cz + 6, 30, 6);
+      }
+
+      // Summit Temple Sanctuary & Torch Braziers
+      this.fillBox(cx - 10, curY, cz - 10, cx + 10, curY + 16, cz + 10, 20, 6);
+      this.fillBox(cx - 3, curY, cz + 8, cx + 3, curY + 10, cz + 11, 47, 1);
+      this.fillCylinder(cx - 8, curY + 16, cz + 8, 2.2, 4, 40, 1);
+      this.fillCylinder(cx + 8, curY + 16, cz + 8, 2.2, 4, 40, 1);
+    }
+
+    generate(seedInt, role, tierIdx, sp, prefixIdx = 0, originIdx = 0) {
+      this.initRNG(seedInt);
+
+      this.currentStamp++;
+      if (this.currentStamp >= 65530) {
+        this.stampGrid.fill(0);
+        this.currentStamp = 1;
+      }
+      this.occupiedCount = 0;
+
+      this.setupArchitecturePalette(sp, role, tierIdx, prefixIdx, originIdx);
+      const baseY = this.buildEstatePlinth(role);
+
+      if (role === 'MEGA_CHURCH') this.buildMegaChurch(baseY);
+      else if (role === 'CITADEL_CASTLE') this.buildCitadelCastle(baseY);
+      else if (role === 'EASTERN_PAGODA') this.buildEasternPagoda(baseY);
+      else if (role === 'SACRED_DOMES') this.buildSacredDomes(baseY);
+      else if (role === 'ANCIENT_WONDER') this.buildAncientWonder(sp, baseY);
+      else this.buildGothicCathedral(baseY);
+
+      this.bakeSurfaceVoxels();
+      this.render();
+      return this.canvas.toDataURL('image/png');
+    }
+
+    bakeSurfaceVoxels() {
+      const grid = this.grid;
+      const stampGrid = this.stampGrid;
+      const stamp = this.currentStamp;
+      const count = this.occupiedCount;
+      const list = this.occupiedList;
+      const sunX = -0.45, sunY = 0.78, sunZ = 0.42;
+
+      let sIdx = 0;
+      const maxSurf = this.surfX.length;
+
+      for (let i = 0; i < count; i++) {
+        const idx = list[i];
+        const mat = grid[idx];
+        const x = idx & 127;
+        const z = (idx >> 7) & 127;
+        const y = (idx >> 14) & 127;
+        if (x < 2 || x > 125 || y < 2 || y > 125 || z < 2 || z > 125) continue;
+
+        const expTop   = stampGrid[idx + 16384] !== stamp;
+        const expBot   = stampGrid[idx - 16384] !== stamp;
+        const expLeft  = stampGrid[idx - 1] !== stamp;
+        const expRight = stampGrid[idx + 1] !== stamp;
+        const expFront = stampGrid[idx + 128] !== stamp;
+        const expBack  = stampGrid[idx - 128] !== stamp;
+
+        if (!expTop && !expBot && !expLeft && !expRight && !expFront && !expBack) continue;
+        if (sIdx >= maxSurf) break;
+
+        let occ = 0;
+        if (!expTop) occ += 2;
+        if (!expBot) occ += 2;
+        if (!expLeft) occ += 2;
+        if (!expRight) occ += 2;
+        if (!expFront) occ += 2;
+        if (!expBack) occ += 2;
+        const ao = 1.12 - (occ / 12) * 0.46;
+
+        let inShadow = false;
+        let srx = x + sunX * 1.8, sry = y + sunY * 1.8, srz = z + sunZ * 1.8;
+        for (let step = 0; step < 14; step++) {
+          const ix = srx | 0, iy = sry | 0, iz = srz | 0;
+          if (ix <= 1 || ix >= 126 || iy >= 126 || iz <= 1 || iz >= 126) break;
+          if (stampGrid[ix + (iz << 7) + (iy << 14)] === stamp) {
+            inShadow = true;
+            break;
+          }
+          srx += sunX * 2.0; sry += sunY * 2.0; srz += sunZ * 2.0;
+        }
+
+        let dirLight = 0.88;
+        if (expTop) dirLight += 0.25;
+        if (expLeft) dirLight += 0.09;
+        if (expRight) dirLight -= 0.10;
+
+        const totalLight = this.isEmissive[mat]
+          ? 1.32
+          : Math.max(0.28, Math.min(1.34, ao * dirLight * (inShadow ? 0.65 : 1.08)));
+
+        const baseRGB = this.paletteRGB[mat];
+        const r = (baseRGB >> 16) & 255;
+        const g = (baseRGB >> 8) & 255;
+        const b = baseRGB & 255;
+
+        const mTop = totalLight * 1.08;
+        const mLeft = totalLight * 0.92;
+        const mRight = totalLight * 0.76;
+
+        this.surfX[sIdx] = x - 64;
+        this.surfY[sIdx] = y - 54;
+        this.surfZ[sIdx] = z - 64;
+        this.surfColTop[sIdx]   = (255 << 24) | (Math.min(255, (b * mTop) | 0) << 16)   | (Math.min(255, (g * mTop) | 0) << 8)   | Math.min(255, (r * mTop) | 0);
+        this.surfColLeft[sIdx]  = (255 << 24) | (Math.min(255, (b * mLeft) | 0) << 16)  | (Math.min(255, (g * mLeft) | 0) << 8)  | Math.min(255, (r * mLeft) | 0);
+        this.surfColRight[sIdx] = (255 << 24) | (Math.min(255, (b * mRight) | 0) << 16) | (Math.min(255, (g * mRight) | 0) << 8) | Math.min(255, (r * mRight) | 0);
+        sIdx++;
+      }
+      this.surfCount = sIdx;
+    }
+
+    render(targetCanvas = null) {
+      const W = 512, H = 512;
+      const zBuf = this.zBuf;
+      const pixels = this.pixels;
+
+      zBuf.fill(1e9);
+
+      for (let py = 0; py < H; py++) {
+        const rowOff = py * W;
+        const dy = py - 245;
+        for (let px = 0; px < W; px++) {
+          const dx = px - 256;
+          const d = Math.min(1, Math.hypot(dx, dy) / 340);
+          const v = (24 * (1 - d) + 6 * d) | 0;
+          pixels[rowOff + px] = (255 << 24) | ((v + 4) << 16) | ((v + 2) << 8) | v;
+        }
+      }
+
+      const cosY = Math.cos(this.yaw), sinY = Math.sin(this.yaw);
+      const cosP = Math.cos(this.pitch), sinP = Math.sin(this.pitch);
+      const scale = this.scale;
+
+      const count = this.surfCount;
+      const sxArr = this.surfX, syArr = this.surfY, szArr = this.surfZ;
+      const cTop = this.surfColTop, cLeft = this.surfColLeft, cRight = this.surfColRight;
+
+      for (let i = 0; i < count; i++) {
+        const vx = sxArr[i], vy = syArr[i], vz = szArr[i];
+
+        const rx = vx * cosY - vz * sinY;
+        const rz1 = vx * sinY + vz * cosY;
+        const ry = vy * cosP - rz1 * sinP;
+        const depth = vy * sinP + rz1 * cosP;
+
+        const sx = (256 + rx * scale) | 0;
+        const sy = (284 - ry * scale) | 0;
+        if (sx < 3 || sx >= 508 || sy < 3 || sy >= 508) continue;
+
+        const zVal = -depth;
+        const topC = cTop[i], leftC = cLeft[i], rightC = cRight[i];
+
+        // Watertight 5x5 Voxel Block Splat
+        for (let dy = -2; dy <= 2; dy++) {
+          const rowIdx = (sy + dy) * W;
+          for (let dx = -2; dx <= 2; dx++) {
+            const pIdx = rowIdx + sx + dx;
+            if (zVal < zBuf[pIdx]) {
+              zBuf[pIdx] = zVal;
+              pixels[pIdx] = dy <= -1 ? topC : (dx <= 0 ? leftC : rightC);
+            }
+          }
+        }
+      }
+
+      const ctx = targetCanvas ? targetCanvas.getContext('2d') : this.ctx;
+      ctx.putImageData(this.imgData, 0, 0);
+    }
+  }
+
+  const _sharedArchEngine = new VoxelArchitectureEngine();
+  const _archDataURLCache = new Map();
+
+  function generateBonsaiImage(seedInt, role, tierIdx, sp, prefixIdx = 0, originIdx = 0) {
+    const key = `${seedInt}_${role}_${tierIdx}_${sp}_${prefixIdx}_${originIdx}`;
+    let cached = _archDataURLCache.get(key);
+    if (cached) return cached;
+
+    _sharedArchEngine.yaw = 0.52;
+    _sharedArchEngine.pitch = 0.34;
+    const dataUrl = _sharedArchEngine.generate(seedInt, role, tierIdx, sp, prefixIdx, originIdx);
+    if (_archDataURLCache.size > 160) {
+      const oldest = _archDataURLCache.keys().next().value;
+      _archDataURLCache.delete(oldest);
+    }
+    _archDataURLCache.set(key, dataUrl);
+    return dataUrl;
+  }
+
+  function ensureTreeImage(p) {
+    if (!p.imgData) {
+      const sp = TREE_SPECIES[p.mIdx] || "Notre-Dame Twin-Spire Cathedral";
+      p.imgData = generateBonsaiImage(
+        p.seedInt,
+        p.role,
+        p.tierIndex ?? p.tierIdx ?? 0,
+        sp,
+        p.pIdx ?? 0,
+        p.bIdx ?? 0
+      );
+    }
+    return p.imgData;
+  }
+
+  /* ================= 60 FPS 3D MONUMENT INSPECTOR MODAL ================= */
+  const inspectCanvas = $('inspect-canvas');
+  let inspectDragging = false, inspLastX = 0, inspLastY = 0, currentInspectSeed = 2026;
+
+  function openInspectModal(seedInt, role, tierIdx, mIdx, pIdx, bIdx, name) {
+    currentInspectSeed = seedInt;
+    const sp = TREE_SPECIES[mIdx] || "Notre-Dame Twin-Spire Cathedral";
+    const matName = TREE_PREFIXES[pIdx ?? 0] || "Carrara-Marble";
+    const eraName = TREE_ORIGINS[bIdx ?? 0] || "High-Gothic";
+    $('modal-title').innerText = name;
+    $('modal-sub').innerText = `${matName} • ${eraName} // Style: ${role}`;
+    $('voxel-modal').classList.add('open');
+
+    _sharedArchEngine.yaw = 0.52;
+    _sharedArchEngine.pitch = 0.34;
+    _sharedArchEngine.generate(seedInt, role, tierIdx, sp, pIdx ?? 0, bIdx ?? 0);
+    _sharedArchEngine.render(inspectCanvas);
+  }
+
+  function closeInspectModal() {
+    $('voxel-modal').classList.remove('open');
+  }
+
+  function downloadInspectPNG() {
+    const a = document.createElement('a');
+    a.download = `monument-512-${currentInspectSeed}.png`;
+    a.href = inspectCanvas.toDataURL('image/png');
+    a.click();
+  }
+
+  inspectCanvas.addEventListener('pointerdown', (e) => {
+    inspectDragging = true; inspLastX = e.clientX; inspLastY = e.clientY;
+    inspectCanvas.setPointerCapture(e.pointerId);
+  });
+  inspectCanvas.addEventListener('pointermove', (e) => {
+    if (!inspectDragging) return;
+    _sharedArchEngine.yaw = ((_sharedArchEngine.yaw + (e.clientX - inspLastX) * 0.012 + Math.PI) % (Math.PI * 2)) - Math.PI;
+    _sharedArchEngine.pitch = Math.max(-0.10, Math.min(0.80, _sharedArchEngine.pitch + (e.clientY - inspLastY) * 0.008));
+    inspLastX = e.clientX; inspLastY = e.clientY;
+    _sharedArchEngine.render(inspectCanvas);
+  });
+  inspectCanvas.addEventListener('pointerup', () => { inspectDragging = false; });
+
+  /* ================= STATE (REALISTIC STARTING BUDGET!) ================= */
+  let State = {
+    funds: 500,          // Realistic $500 Architectural Studio starting budget
+    fuelReserve: 1000,   // Cut Stone & Masonry Tons
+    fuelSpotPrice: 0.25, // $0.25 per ton
+    buyMode: 1, 
+    sortHangarMode: 'val',
+    filterHangarRole: 'ALL',
+    filterHangarTier: 'ALL',
+    sortPilotsMode: 'val',
+    filterPilotTier: 'ALL',
+    filterRouteCat: 'ALL',
+    fleet: [], pilots: [], routes: [], auctions: [], marketCars: [],
+    gallery: [], 
+    marketTimer: 10.0,
+    upgrades: { mkt: 0, eng: 0 },
+    automation: { autoDispatch: false, autoMRO: false, autoRefuel: false },
+    claimedMilestones: [],
+    sideMissions: [],
+    statAuctionsSold: 0,
+    statPlanesScrapped: 0
+  };
+  let globalInterval = null;
+  let needsFleetRender = false;
+
+  /* ================= UTILITY & BASE36 (20,000 COMBINATIONS) ================= */
+  function fmt(n) {
+    if (n >= 1e12) return (n / 1e12).toFixed(2) + "T";
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e4) return (n / 1e3).toFixed(1) + "K";
+    return Math.floor(n).toLocaleString();
+  }
+  function toast(msg) {
+    const r = $('toast-rack'); const e = document.createElement('div');
+    e.className = 'toast'; e.innerHTML = msg; r.appendChild(e);
+    setTimeout(() => e.remove(), 2800);
+  }
+  function updateHUD() {
+    if($('hud-funds')) $('hud-funds').innerText = `$${fmt(State.funds)}`;
+    if($('hud-fleet-count')) $('hud-fleet-count').innerText = State.fleet.length;
+    if($('hud-pilot-count')) $('hud-pilot-count').innerText = State.pilots.length;
+    if($('hud-fuel')) $('hud-fuel').innerText = fmt(State.fuelReserve);
+  }
+  
+  function saveGame() { 
+    let s = JSON.parse(JSON.stringify(State));
+    s.fleet.forEach(p => delete p.imgData);
+    s.marketCars.forEach(p => delete p.imgData);
+    s.gallery.forEach(g => delete g.imgData);
+    s.auctions.forEach(a => { if(a.item.imgData) delete a.item.imgData; });
+    localStorage.setItem('monumentSyndicateV1', JSON.stringify(s)); 
+    toast("Portfolio Saved."); 
+  }
+  
+  function loadGame() {
+    let s = localStorage.getItem('monumentSyndicateV1');
+    if (s) {
+      State = JSON.parse(s);
+      if(!State.gallery) State.gallery = [];
+      if(!State.routes || State.routes.length < 400) State.routes = generateRoutes();
+      State.fleet.forEach(p => { p.status = 'READY'; p.flightEnd = 0; p.flightStart = 0; });
+      updateHUD(); setTab('market');
+      toast("Portfolio Restored.");
+    } else {
+      toast("No saved portfolio found.");
+    }
+  }
+
+  function setBuyMode(val) {
+      State.buyMode = val;
+      ['buy-1','buy-0.25','buy-0.5','buy-1.0'].forEach(id => { if($(id)) $(id).classList.remove('active'); });
+      let sel = val===1?'buy-1':val===0.25?'buy-0.25':val===0.5?'buy-0.5':'buy-1.0';
+      if($(sel)) $(sel).classList.add('active');
+  }
+
+  /* BASE36 FOR ARCHITECTS */
+  function exportCourier(uid) {
+    let p = State.pilots.find(x => x.uid===uid); if(!p) return;
+    let codeInt = p.fIdx * 160 + p.lIdx * 8 + p.cIdx;
+    prompt("Copy Architect Trade Code:", "ARC-" + codeInt.toString(36).toUpperCase());
+  }
+  function importCourier() {
+    let str = prompt("Enter Architect Trade Code (ARC-XXX):"); if(!str) return;
+    str = str.replace('ARC-', '').trim();
+    let codeInt = parseInt(str, 36); if(isNaN(codeInt) || codeInt < 0) { toast("Invalid code."); return; }
+    let cIdx = codeInt % 8; codeInt = Math.floor(codeInt / 8);
+    let lIdx = codeInt % 20; codeInt = Math.floor(codeInt / 20);
+    let fIdx = codeInt % 20;
+    let tIdx = Math.floor(Math.random() * 10);
+    let bIdx = Math.floor(Math.random() * 4);
+    State.pilots.push(hireCourier(fIdx, lIdx, cIdx, tIdx, bIdx)); 
+    updateHUD(); renderPilots(); toast("Architect hired via Trade Code!");
+  }
+
+  /* BASE36 FOR 20,000 LANDMARKS */
+  function exportStrain(uid) {
+    let p = State.fleet.find(x => x.uid===uid); if(!p) return;
+    let codeInt = ((p.pIdx * 10 + p.bIdx) * 20 + p.mIdx) * 10 + p.tierIndex;
+    prompt("Copy Landmark Deed Code (1 of 20,000):", "MN-" + codeInt.toString(36).toUpperCase());
+  }
+  function importStrain() {
+    let str = prompt("Enter Landmark Deed Code (MN-XXX):"); if(!str) return;
+    str = str.replace('MN-', '').trim();
+    let codeInt = parseInt(str, 36); if(isNaN(codeInt) || codeInt < 0) { toast("Invalid code."); return; }
+    let tIdx = codeInt % 10; codeInt = Math.floor(codeInt / 10);
+    let mIdx = codeInt % 20; codeInt = Math.floor(codeInt / 20);
+    let bIdx = codeInt % 10; codeInt = Math.floor(codeInt / 10);
+    let pIdx = codeInt % 10;
+    let rIdx = getStyleForSpecies(mIdx);
+    
+    let tD = TIERS[tIdx];
+    let val = Math.floor(tD.baseVal * 1.0); 
+    let cost = Math.max(10, Math.floor(val * 0.8)); 
+    let cap = Math.floor(85 + (tIdx * 65)); // Spire Height (FT)
+    let rnge = Math.floor(1000 + (tIdx * 900));
+    let burn = Math.floor(4 + (tIdx * 3));
+    let seedInt = ((pIdx * 10 + bIdx) * 20 + mIdx) * 31 + tIdx + 2000;
+    let sp = TREE_SPECIES[mIdx];
+    let role = TREE_STYLES[rIdx];
+
+    let importedMonument = {
+      uid: 'L' + Math.floor(100+Math.random()*899) + 'MN',
+      pIdx, bIdx, mIdx, rIdx, tierIndex: tIdx,
+      seedInt: seedInt,
+      imgData: generateBonsaiImage(seedInt, role, tIdx, sp, pIdx, bIdx),
+      name: `${TREE_PREFIXES[pIdx]} ${TREE_ORIGINS[bIdx]} ${sp}`,
+      role: role, tierName: tD.name, tierColor: tD.color,
+      value: val, cost: cost, capacity: cap, range: rnge, fuelBurn: burn,
+      condition: 100, status: 'READY', assignedRoute: null, assignedPilot: null
+    };
+    
+    State.fleet.push(importedMonument);
+    updateHUD(); renderFleet(); toast("Landmark acquired via Deed Code!");
+  }
+
+  function generateRoutes() {
+    let rts = [];
+    let roles = TREE_STYLES;
+    let used = new Set();
+    let idCounter = 0;
+
+    roles.forEach(role => {
+      let pool = ZONE_CAT[role] || ZONE_CAT["GOTHIC_CATHEDRAL"];
+      let count = role === "GOTHIC_CATHEDRAL" || role === "CITADEL_CASTLE" ? 80 : 60; // 400 total
+      for(let i=0; i<count; i++) {
+        let a1, a2, pair;
+        let attempts = 0;
+        do {
+          a1 = pool[Math.floor(Math.random() * pool.length)];
+          a2 = pool[Math.floor(Math.random() * pool.length)];
+          pair = `${a1}-${a2}-${role}`;
+          attempts++;
+        } while((a1 === a2 || used.has(pair)) && attempts < 50);
+        
+        used.add(pair);
+        let dist = role === 'ANCIENT_WONDER' ? Math.floor(1200 + Math.random() * 7500) : Math.floor(350 + Math.random() * 8500);
+        
+        rts.push({
+          id: "rt_" + (idCounter++),
+          name: `${a1} ↔ ${a2}`, role: role, dist: dist,
+          cost: Math.ceil((35 + (Math.pow(dist, 1.15) * 0.42)) / 5) * 5,
+          unlocked: idCounter === 1,
+          minTier: dist > 6500 ? "UNESCO World Tour" : dist > 4000 ? "International" : dist > 1500 ? "National" : "Regional Expo"
+        });
+      }
+    });
+
+    rts.sort((a,b) => a.dist - b.dist);
+    rts[0].unlocked = true;
+    return rts;
+  }
+
+  function getStyleForSpecies(mIdx) {
+    if (mIdx <= 3) return 0;  // GOTHIC_CATHEDRAL
+    if (mIdx <= 6) return 1;  // MEGA_CHURCH
+    if (mIdx <= 10) return 2; // CITADEL_CASTLE
+    if (mIdx <= 13) return 3; // EASTERN_PAGODA
+    if (mIdx <= 16) return 4; // SACRED_DOMES
+    return 5;                 // ANCIENT_WONDER
+  }
+
+  function harvestStrain(tIdx, skipImage = false) {
+    let pIdx = Math.floor(Math.random() * TREE_PREFIXES.length);
+    let bIdx = Math.floor(Math.random() * TREE_ORIGINS.length);
+    let mIdx = Math.floor(Math.random() * TREE_SPECIES.length);
+    let rIdx = getStyleForSpecies(mIdx);
+    let tD = TIERS[tIdx];
+    let sp = TREE_SPECIES[mIdx];
+    let role = TREE_STYLES[rIdx];
+
+    let fluct = 1.0 + (Math.random() * 0.4 - 0.2); 
+    let val = Math.max(8, Math.floor(tD.baseVal * fluct));
+    let seedInt = Math.floor(Math.random() * 9999999);
+
+    return {
+      uid: 'L' + Math.floor(100+Math.random()*899) + 'MN',
+      pIdx, bIdx, mIdx, rIdx, tierIndex: tIdx, seedInt: seedInt,
+      imgData: skipImage ? null : generateBonsaiImage(seedInt, role, tIdx, sp, pIdx, bIdx),
+      name: `${TREE_PREFIXES[pIdx]} ${TREE_ORIGINS[bIdx]} ${sp}`,
+      role: role, tierName: tD.name, tierColor: tD.color,
+      value: val, cost: Math.max(6, Math.floor(val * 0.78)), 
+      capacity: Math.floor(85 + (tIdx * 65) * fluct), // Spire Height in Feet (FT)
+      range: Math.floor(1000 + (tIdx * 900) * fluct), 
+      fuelBurn: Math.floor(3 + (tIdx * 2)), // Masonry Tons
+      condition: 100, status: 'READY', assignedRoute: null, assignedPilot: null
+    };
+  }
+
+  function hireCourier(fIdx, lIdx, cIdx, tIdx, bIdx) {
+    let rawPow = [6,25,100,300,1000,2500,6000,15000,35000,66666][tIdx];
+    return {
+      uid: Date.now()+Math.random().toString(36).substring(2,8), fIdx, lIdx, cIdx, tIdx, bIdx,
+      name: `${P_FIRST[fIdx]} ${P_CALL[cIdx]} ${P_LAST[lIdx]}`,
+      tierIndex: tIdx, tierName: TIERS[tIdx].name, tierColor: TIERS[tIdx].color,
+      bType: B_TYPES[bIdx], bonus: rawPow, value: Math.max(15, Math.floor(TIERS[tIdx].baseVal * 0.4)),
+      locked: false, assignedTo: null
+    };
+  }
+
+  /* ================= BLUEPRINT MARKET (NO MARKET IMAGES!) ================= */
+  function refreshMarket() {
+    State.marketCars = [];
+    for(let i=0; i<5; i++) {
+      let r = Math.random()*100; let tI = r>99.9?9 : r>99?8 : r>95?7 : r>85?6 : r>70?5 : r>50?4 : r>30?3 : r>15?2 : r>5?1 : 0;
+      State.marketCars.push(harvestStrain(tI, true));
+    }
+    renderMarket();
+  }
+
+  function renderMarket() {
+    const grid = $('market-grid'); if(!grid) return; grid.innerHTML = '';
+    State.marketCars.forEach((c, idx) => {
+      let rCol = c.role === 'GOTHIC_CATHEDRAL' ? '#38bdf8' : c.role === 'MEGA_CHURCH' ? '#22c55e' : c.role === 'CITADEL_CASTLE' ? '#ef4444' : c.role === 'EASTERN_PAGODA' ? '#a855f7' : c.role === 'SACRED_DOMES' ? '#f59e0b' : '#fbbf24';
+      const matTag = `${TREE_PREFIXES[c.pIdx ?? 0]} • ${TREE_ORIGINS[c.bIdx ?? 0]}`;
+      grid.innerHTML += `
+        <div class="strain-card" style="border-color:${c.tierColor};">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:${c.tierColor}; font-weight:bold; font-size:10px;">[${c.tierName}]</span>
+            <span class="badge" style="color:${rCol}; border-color:${rCol};">${c.role}</span>
+          </div>
+          <div class="bud-art-container" style="padding:8px 10px;">
+            <div style="flex:1;">
+              <div style="font-size:12px; font-weight:900; color:#fff;">${c.name}</div>
+              <div style="font-size:9px; color:var(--status-amber); margin-top:2px;">Material: ${matTag} // Deed #${c.seedInt}</div>
+            </div>
+          </div>
+          <div class="spec-grid">
+            <div><span>HEIGHT:</span> ${c.capacity} FT</div>
+            <div><span>TOURS:</span> ${c.range.toLocaleString()} MI</div>
+            <div><span>STONE:</span> ${c.fuelBurn} t/ex</div>
+            <div><span>VAL:</span> $${fmt(c.value)}</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <div>
+              <div style="font-size:9px; color:var(--silver-dim);">Appraised Val: $${fmt(c.value)}</div>
+              <div style="font-size:12px; color:var(--status-green); font-weight:bold; font-family:monospace;">Deed Ask: $${fmt(c.cost)}</div>
+            </div>
+            <button class="btn btn-green" onclick="buyMarketStrain(${idx})">ACQUIRE</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function buyMarketStrain(idx) {
+    let c = State.marketCars[idx]; if(!c) return;
+    if(State.funds < c.cost) { toast("Insufficient funds."); return; }
+    State.funds -= c.cost;
+    ensureTreeImage(c);
+    State.fleet.push(c);
+    State.marketCars.splice(idx, 1);
+    toast(`Constructed: ${c.name}`); updateHUD(); renderMarket();
+  }
+
+  function buySeeds(bIdx, count) {
+    let costs = [20, 200, 2000, 15000];
+    let c = State.buyMode === 1 ? count : Math.max(1, Math.floor(Math.floor(State.funds/costs[bIdx]) * State.buyMode));
+    let cost = costs[bIdx] * c;
+    if(State.funds < cost) { toast("Insufficient funds."); return; }
+    State.funds -= cost;
+    let tArr = bIdx===0?[0,1,2,3]:bIdx===1?[2,3,4,5]:bIdx===2?[4,5,6,7]:[6,7,8,9];
+    for(let i=0; i<c; i++) {
+      let r = Math.random()*100; let tI = r>95?tArr[3]:r>80?tArr[2]:r>50?tArr[1]:tArr[0];
+      State.fleet.push(harvestStrain(tI, c > 10));
+    }
+    updateHUD(); toast(`Drafted ${c}x Landmarks.`);
+  }
+
+  function buyResumes(bIdx, count) {
+    let costs = [25, 150, 800, 4000];
+    let c = State.buyMode === 1 ? count : Math.max(1, Math.floor(Math.floor(State.funds/costs[bIdx]) * State.buyMode));
+    let cost = costs[bIdx] * c;
+    if(State.funds < cost) { toast("Insufficient funds."); return; }
+    State.funds -= cost;
+    let tArr = bIdx===0?[0,1,2,3]:bIdx===1?[2,3,4,5]:bIdx===2?[4,5,6,7]:[6,7,8,9];
+    for(let i=0; i<c; i++) {
+      let r = Math.random()*100; let tI = r>95?tArr[3]:r>80?tArr[2]:r>50?tArr[1]:tArr[0];
+      State.pilots.push(hireCourier(Math.floor(Math.random()*20), Math.floor(Math.random()*20), Math.floor(Math.random()*8), tI, Math.floor(Math.random()*4)));
+    }
+    updateHUD(); toast(`Hired ${c}x Architects.`);
+  }
+
+  function buyFuelFixed(amount) {
+    let unit = State.fuelSpotPrice;
+    let gal = amount === 'MAX' ? Math.floor(State.funds / unit) : amount;
+    if(gal <= 0) { toast("Insufficient funds."); return; }
+    let cost = gal * unit;
+    if(State.funds < cost) { toast("Insufficient funds."); return; }
+    State.funds -= cost; State.fuelReserve += gal;
+    toast(`Quarried ${fmt(gal)} Tons of Stone.`); updateHUD();
+  }
+
+  /* ================= LANDMARK ESTATES (INVENTORY) ================= */
+  function sortHangar(mode) { State.sortHangarMode = mode; renderFleet(); }
+  function filterHangarRole(val) { State.filterHangarRole = val; renderFleet(); }
+  function filterHangarTier(val) { State.filterHangarTier = val; renderFleet(); }
+  
+  function assignRoute(pUid, rId) { const p = State.fleet.find(x=>x.uid===pUid); if(p) p.assignedRoute = rId; }
+  function assignPilot(pUid, piUid) {
+    const p = State.fleet.find(x=>x.uid===pUid); if(!p) return;
+    if(p.assignedPilot) { let o = State.pilots.find(x=>x.uid===p.assignedPilot); if(o) o.assignedTo = null; }
+    if(piUid==="") p.assignedPilot = null; 
+    else { p.assignedPilot=piUid; let n=State.pilots.find(x=>x.uid===piUid); if(n) n.assignedTo=pUid; }
+    renderFleet();
+  }
+
+  function autoAssignPilots() {
+    let unassigned = State.fleet.filter(p => !p.assignedPilot && p.status === 'READY');
+    let freeCouriers = State.pilots.filter(p => !p.assignedTo && !p.locked).sort((a,b) => b.bonus - a.bonus);
+    if(unassigned.length === 0 || freeCouriers.length === 0) {
+      toast("No unassigned landmarks or available architects."); return;
+    }
+    let paired = 0;
+    unassigned.forEach(p => {
+      if(freeCouriers.length > 0) {
+        let pilot = freeCouriers.shift();
+        p.assignedPilot = pilot.uid;
+        pilot.assignedTo = p.uid;
+        paired++;
+      }
+    });
+    toast(`Assigned architects to ${paired} landmarks.`); renderFleet(); renderPilots();
+  }
+
+  function autoAssignRoutes() {
+    let unrouted = State.fleet.filter(p => !p.assignedRoute && p.status === 'READY');
+    let uRts = State.routes.filter(r => r.unlocked);
+    if(unrouted.length === 0 || uRts.length === 0) {
+      toast("No idle landmarks or unlocked expos."); return;
+    }
+    let routedCnt = 0;
+    unrouted.forEach(p => {
+      let valid = uRts.filter(r => (r.role === p.role || r.role === 'GOTHIC_CATHEDRAL') && r.dist <= p.range);
+      if(valid.length > 0) {
+        valid.sort((a,b) => b.dist - a.dist);
+        p.assignedRoute = valid[0].id;
+        routedCnt++;
+      }
+    });
+    toast(`Auto-Scheduled ${routedCnt} landmarks to furthest expos.`);
+    renderFleet();
+  }
+
+  function renderFleet() {
+    const list = $('fleet-list'); if(!list) return; list.innerHTML = '';
+    let filtered = [...State.fleet];
+    if(State.filterHangarRole !== 'ALL') filtered = filtered.filter(p => p.role === State.filterHangarRole);
+    if(State.filterHangarTier !== 'ALL') filtered = filtered.filter(p => p.tierIndex === parseInt(State.filterHangarTier));
+    
+    if(filtered.length===0) { list.innerHTML=`<div style="text-align:center; padding:20px; color:var(--silver-dim); font-size:11px;">No landmarks match current filters.</div>`; return; }
+
+    if(State.sortHangarMode==='val') filtered.sort((a,b)=>b.value-a.value);
+    if(State.sortHangarMode==='tier') filtered.sort((a,b)=>b.tierIndex-a.tierIndex);
+    if(State.sortHangarMode==='range') filtered.sort((a,b)=>b.range-a.range);
+
+    const uRts = State.routes.filter(r => r.unlocked);
+    
+    let routeOptionsCache = {};
+    TREE_STYLES.forEach(role => {
+        let opts = `<option value="">-- Assign World Expo (${role}) --</option>`;
+        uRts.filter(r => r.role === role || r.role === 'GOTHIC_CATHEDRAL').forEach(r => {
+            opts += `<option value="${r.id}">${r.name} [${r.role}] (${r.dist} MI)</option>`;
+        });
+        routeOptionsCache[role] = opts;
+    });
+
+    let pilotOpts = `<option value="">-- Assign Master Architect --</option>`;
+    State.pilots.forEach(pl => { 
+        if(!pl.assignedTo) pilotOpts += `<option value="${pl.uid}">${pl.name} [${pl.bType}: +${fmt(pl.bonus)}%]</option>`; 
+    });
+
+    filtered.forEach(p => {
+      ensureTreeImage(p);
+      let rCol = p.role === 'GOTHIC_CATHEDRAL' ? '#38bdf8' : p.role === 'MEGA_CHURCH' ? '#22c55e' : p.role === 'CITADEL_CASTLE' ? '#ef4444' : p.role === 'EASTERN_PAGODA' ? '#a855f7' : p.role === 'SACRED_DOMES' ? '#f59e0b' : '#fbbf24';
+      
+      let pOpts = routeOptionsCache[p.role];
+      if(p.assignedRoute) pOpts = pOpts.replace(`value="${p.assignedRoute}"`, `value="${p.assignedRoute}" selected`);
+      let rtSel = `<select ${p.status==='IN_FLIGHT'?'disabled':''} onchange="assignRoute('${p.uid}', this.value)">${pOpts}</select>`;
+
+      let pPilotOpts = pilotOpts;
+      if(p.assignedPilot) {
+          let pl = State.pilots.find(x=>x.uid === p.assignedPilot);
+          if(pl) pPilotOpts += `<option value="${pl.uid}" selected>${pl.name}</option>`;
+      }
+      let piSel = `<select ${p.status==='IN_FLIGHT'?'disabled':''} onchange="assignPilot('${p.uid}', this.value)">${pPilotOpts}</select>`;
+      const safeName = p.name.replace(/'/g, "\\'");
+      const matTag = `${TREE_PREFIXES[p.pIdx ?? 0]} • ${TREE_ORIGINS[p.bIdx ?? 0]}`;
+
+      list.innerHTML += `
+        <div class="strain-card ${p.status==='IN_FLIGHT'?'in-flight':p.condition<50?'damaged':''}" style="border-color:${p.tierColor};">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span style="color:${p.tierColor}; font-weight:bold; font-size:10px;">[${p.tierName}]</span>
+              <span style="font-size:12px; font-weight:900; color:#fff; margin-left:3px;">${p.name}</span>
+            </div>
+            <span class="badge" style="color:${rCol}; border-color:${rCol};">${p.role}</span>
+          </div>
+          
+          <div class="bud-art-container">
+            <img class="bud-pixel-canvas" src="${p.imgData}" title="Tap to Rotate 3D Monument" onclick="openInspectModal(${p.seedInt}, '${p.role}', ${p.tierIndex}, ${p.mIdx}, ${p.pIdx ?? 0}, ${p.bIdx ?? 0}, '${safeName}')">
+            <div style="flex:1;">
+              <div style="font-size:10px; font-weight:bold; color:var(--status-amber);">${matTag}</div>
+              <div style="font-size:9px; color:var(--silver-bright);">Spire Height: ${p.capacity} ft // Val: $${fmt(p.value)}</div>
+              <div style="font-size:8.5px; color:var(--silver-dim);">Tap building for 60FPS 3D View</div>
+            </div>
+            <button class="btn btn-purple" style="padding:4px 6px; font-size:9px;" onclick="snapGalleryPic('${p.uid}')">📸 Vault</button>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-size:8.5px; font-family:monospace; color:var(--silver-dim);">
+            <span>MASONRY INTEGRITY: ${p.condition.toFixed(0)}%</span>
+            <span id="st-${p.uid}">STATUS: <strong style="color:#fff;">${p.status}</strong></span>
+          </div>
+          
+          <div style="display:flex; flex-direction:column; gap:3px;">${rtSel}${piSel}</div>
+          ${p.status==='IN_FLIGHT'?`<div class="flight-bar-bg"><div id="bar-${p.uid}" class="flight-bar-fill"></div></div>`:''}
+          
+          <div style="display:flex; justify-content:space-between; margin-top:3px;">
+            <div style="display:flex; gap:3px;">
+              <button class="btn" style="padding:3px 5px; font-size:8px;" onclick="exportStrain('${p.uid}')">Deed</button>
+              <button class="btn btn-purple" style="padding:3px 5px; font-size:8px;" ${p.status==='IN_FLIGHT'?'disabled':''} onclick="initAuction('${p.uid}', 'plane')">Auction</button>
+              <button class="btn btn-danger" style="padding:3px 5px; font-size:8px;" ${p.status==='IN_FLIGHT'?'disabled':''} onclick="consumeStrain('${p.uid}')">Sell Local</button>
+            </div>
+            <div style="display:flex; gap:3px;">
+              <button class="btn" style="padding:3px 6px; font-size:8px;" ${p.status==='IN_FLIGHT'?'disabled':''} onclick="maintainAirframe('${p.uid}')">Restore</button>
+              <button class="btn btn-green" style="padding:4px 8px; font-size:8.5px;" ${p.status==='IN_FLIGHT'||!p.assignedRoute||!p.assignedPilot?'disabled':''} onclick="dispatchFlight('${p.uid}')">Open Tour</button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function consumeStrain(uid) {
+    let i = State.fleet.findIndex(x=>x.uid===uid); if(i===-1) return;
+    let val = Math.max(5, Math.floor(State.fleet[i].value * 0.5)); State.funds+=val;
+    if(State.fleet[i].assignedPilot) { let p=State.pilots.find(x=>x.uid===State.fleet[i].assignedPilot); if(p) p.assignedTo=null; }
+    State.fleet.splice(i,1); State.statPlanesScrapped++;
+    toast(`Transferred deed locally. Yielded $${fmt(val)}.`); updateHUD(); renderFleet();
+  }
+
+  function quickSellStrains(maxT) {
+    let t = State.fleet.filter(s=>s.tierIndex<=maxT && s.status==='READY');
+    if(t.length===0){toast("No eligible landmarks in tier bracket.");return;}
+    let tot=0; t.forEach(s=>{
+      tot+=Math.max(5, Math.floor(s.value*0.5));
+      if(s.assignedPilot) { let p=State.pilots.find(x=>x.uid===s.assignedPilot); if(p) p.assignedTo=null; }
+      State.statPlanesScrapped++;
+    });
+    State.fleet = State.fleet.filter(s=>s.tierIndex>maxT || s.status!=='READY');
+    State.funds+=tot; toast(`Sold ${t.length} deeds locally for $${fmt(tot)}.`); updateHUD(); renderFleet(); renderPilots();
+  }
+
+  /* ================= WONDER VAULT GALLERY ================= */
+  function snapGalleryPic(uid) {
+    let p = State.fleet.find(x => x.uid === uid);
+    if(!p) return;
+    ensureTreeImage(p);
+    
+    State.gallery.push({
+      gid: "gal_" + Date.now() + Math.floor(Math.random()*1000),
+      seedInt: p.seedInt, mIdx: p.mIdx, pIdx: p.pIdx ?? 0, bIdx: p.bIdx ?? 0,
+      role: p.role, tierIdx: p.tierIndex,
+      name: p.name, tierName: p.tierName, tierColor: p.tierColor,
+      locked: true, imgData: p.imgData
+    });
+    
+    toast(`📸 Monument enshrined in Wonder Vault!`);
+    if($('tab-gallery').classList.contains('active')) renderGallery();
+  }
+
+  function toggleGalleryLock(gid) {
+    let g = State.gallery.find(x => x.gid === gid);
+    if(g) { g.locked = !g.locked; renderGallery(); }
+  }
+
+  function deleteGalleryPic(gid) {
+    let idx = State.gallery.findIndex(x => x.gid === gid);
+    if(idx > -1) {
+       State.gallery.splice(idx, 1);
+       toast(`Monument removed from Wonder Vault.`);
+       renderGallery();
+    }
+  }
+
+  function renderGallery() {
+    const list = $('gallery-grid'); if(!list) return; list.innerHTML = '';
+    
+    if(State.gallery.length === 0) { 
+        list.innerHTML=`<div style="text-align:center; padding:20px; color:var(--silver-dim); font-size:11px;">Your Wonder Vault is empty. Enshrine prized cathedrals, castles & wonders from your Estates!</div>`; 
+        return; 
+    }
+
+    State.gallery.forEach(g => {
+      ensureTreeImage(g);
+      let rCol = g.role === 'GOTHIC_CATHEDRAL' ? '#38bdf8' : g.role === 'MEGA_CHURCH' ? '#22c55e' : g.role === 'CITADEL_CASTLE' ? '#ef4444' : g.role === 'EASTERN_PAGODA' ? '#a855f7' : g.role === 'SACRED_DOMES' ? '#f59e0b' : '#fbbf24';
+      const safeName = g.name.replace(/'/g, "\\'");
+      
+      list.innerHTML += `
+        <div class="strain-card" style="border-color:${g.locked ? 'var(--status-amber)' : g.tierColor};">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:${g.tierColor}; font-weight:bold; font-size:10px;">[${g.tierName}]</span>
+            <span class="badge" style="color:${rCol}; border-color:${rCol};">${g.role}</span>
+          </div>
+          <div style="display:flex; justify-content:center; padding:10px 0;">
+             <img src="${g.imgData}" onclick="openInspectModal(${g.seedInt}, '${g.role}', ${g.tierIdx}, ${g.mIdx}, ${g.pIdx ?? 0}, ${g.bIdx ?? 0}, '${safeName}')" style="width:160px; height:160px; image-rendering:pixelated; background:#000; border:1px solid #222938; border-radius:4px; cursor:zoom-in;" />
+          </div>
+          <div style="text-align:center; font-size:14px; font-weight:900; color:#fff;">${g.name}</div>
+          <div style="text-align:center; font-size:9px; color:var(--silver-dim); margin-bottom: 8px;">Tap Image for 3D Voxel Inspection</div>
+          <div style="display:flex; justify-content:space-between; gap: 4px;">
+            <button class="btn" style="flex:1;" onclick="toggleGalleryLock('${g.gid}')">${g.locked ? 'UNLOCK 🔓' : 'LOCK 🔒'}</button>
+            <button class="btn btn-danger" style="flex:1;" ${g.locked ? 'disabled' : ''} onclick="deleteGalleryPic('${g.gid}')">REMOVE</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  /* ================= ARCHITECTS ROSTER ================= */
+  function sortPilots(mode) { State.sortPilotsMode = mode; renderPilots(); }
+  function filterPilotTier(val) { State.filterPilotTier = val; renderPilots(); }
+
+  function renderPilots() {
+    const grid = $('pilots-grid'); if(!grid) return; grid.innerHTML = '';
+    
+    let filtered = [...State.pilots];
+    if(State.filterPilotTier !== 'ALL') filtered = filtered.filter(p => p.tierIndex === parseInt(State.filterPilotTier));
+    if(filtered.length===0) { grid.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--silver-dim); font-size:11px;">No architects match filter criteria.</div>`; return; }
+
+    if(State.sortPilotsMode==='val') filtered.sort((a,b)=>b.value-a.value);
+    if(State.sortPilotsMode==='tier') filtered.sort((a,b)=>b.tierIndex-a.tierIndex);
+    
+    filtered.forEach(p => {
+      grid.innerHTML += `
+        <div class="strain-card" style="border-color:${p.tierColor};">
+          <div class="stat-block" style="display:flex; justify-content:space-between;">
+            <span style="color:${p.tierColor}; font-weight:bold; font-size:9.5px;">${p.tierName}</span>
+            <span style="color:var(--status-green); font-size:9.5px;">[${p.bType}] +${fmt(p.bonus)}%</span>
+          </div>
+          <div style="font-size:12px; font-weight:900; color:#fff;">${p.name} ${p.locked?'[🔒]':''}</div>
+          <div style="font-size:9px; color:var(--silver-dim);">${p.assignedTo ? `Curating: ${p.assignedTo}` : 'Standby / Unassigned'}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span class="stat-block" style="font-size:10px; color:var(--silver-bright); font-weight:bold;">RETAINER: $${fmt(p.value)}</span>
+            <div style="display:flex; flex-wrap:wrap; gap:3px; justify-content:flex-end;">
+              <button class="btn" style="padding:3px 5px; font-size:8px;" onclick="exportCourier('${p.uid}')">Trade</button>
+              <button class="btn" style="padding:3px 5px; font-size:8px;" onclick="togglePilotLock('${p.uid}')">${p.locked?'Unlock':'Lock'}</button>
+              ${!p.assignedTo&&!p.locked?`<button class="btn btn-purple" style="padding:3px 5px; font-size:8px;" onclick="initAuction('${p.uid}', 'pilot')">Auction</button><button class="btn btn-danger" style="padding:3px 5px; font-size:8px;" onclick="sellPilot('${p.uid}')">Release</button>`:''}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+  function togglePilotLock(uid) { let p=State.pilots.find(x=>x.uid===uid); if(p){p.locked=!p.locked; renderPilots();} }
+  function sellPilot(uid) {
+    let idx = State.pilots.findIndex(s=>s.uid===uid);
+    if(idx>-1) { let v=Math.max(5, Math.floor(State.pilots[idx].value*0.5)); State.funds+=v; State.pilots.splice(idx,1); toast(`Released. Retainer recovered $${fmt(v)}.`); updateHUD(); renderPilots(); renderFleet(); }
+  }
+  function quickSellPilots(maxT) {
+    let ts = State.pilots.filter(s=>s.tierIndex<=maxT && !s.assignedTo && !s.locked);
+    if(ts.length===0){toast("No eligible architects.");return;}
+    let tot=0; ts.forEach(s=>tot+=Math.max(5, Math.floor(s.value*0.5)));
+    State.pilots = State.pilots.filter(s=>s.tierIndex>maxT || s.assignedTo || s.locked);
+    State.funds+=tot; toast(`Released ${ts.length} staff. Recovered $${fmt(tot)}.`); updateHUD(); renderPilots();
+  }
+
+  /* ================= WORLD EXPOS (ROUTES) ================= */
+  function filterRouteCategory(val) { State.filterRouteCat = val; renderRoutes(); }
+
+  function renderRoutes() {
+    const list = $('routes-list'); if(!list) return; list.innerHTML = '';
+    let filtered = State.filterRouteCat === 'ALL' ? State.routes : State.routes.filter(r => r.role === State.filterRouteCat);
+
+    filtered.forEach(r => {
+      let rCol = r.role === 'GOTHIC_CATHEDRAL' ? '#38bdf8' : r.role === 'MEGA_CHURCH' ? '#22c55e' : r.role === 'CITADEL_CASTLE' ? '#ef4444' : r.role === 'EASTERN_PAGODA' ? '#a855f7' : r.role === 'SACRED_DOMES' ? '#f59e0b' : '#fbbf24';
+      let yieldM = 1.0 + (State.upgrades.mkt*0.05);
+      let baseYield = Math.floor(r.dist * 0.16 * yieldM);
+      let fuelCost = ((r.dist * 0.025) * (1 - Math.min(0.7, State.upgrades.eng*0.02))) * State.fuelSpotPrice;
+      let netProfit = Math.max(15, Math.floor(baseYield - fuelCost));
+
+      list.innerHTML += `
+        <div class="route-row">
+          <div style="flex:1;">
+            <div style="font-weight:900; color:#fff;">${r.name} <span class="badge" style="margin-left:4px; color:${rCol}; border-color:${rCol};">${r.role}</span></div>
+            <div style="font-size:9px; color:var(--silver-dim); font-family:monospace; margin-top:2px;">
+              ${r.dist.toLocaleString()} MILES // Circuit: ${r.minTier}
+            </div>
+            <div style="font-size:9px; color:var(--silver-dim); font-family:monospace; margin-top:2px;">
+              Ticket/Tour Rev: $${fmt(baseYield)} | Upkeep: -$${fmt(fuelCost)}
+            </div>
+            <div style="font-size:10px; color:var(--status-green); font-weight:bold; font-family:monospace; margin-top:2px;">
+              Est. Net Yield: ~$${fmt(netProfit)}
+            </div>
+          </div>
+          <div>
+            ${r.unlocked?`<span style="color:var(--status-amber); font-weight:bold; font-family:monospace;">CHARTERED ✓</span>`:`<button class="btn btn-green" onclick="unlockRoute('${r.id}')">Charter ($${fmt(r.cost)})</button>`}
+          </div>
+        </div>
+      `;
+    });
+  }
+  function unlockRoute(rId) { const r=State.routes.find(x=>x.id===rId); if(!r)return; if(State.funds<r.cost){toast("Insufficient Funds.");return;} State.funds-=r.cost; r.unlocked=true; updateHUD(); renderRoutes(); renderFleet(); }
+
+  /* ================= AUTOMATIONS & COMMISSIONS ================= */
+  function toggleAutoLoop() {
+    State.automation.autoDispatch = !State.automation.autoDispatch;
+    toast(`Auto-Tourism Loop: ${State.automation.autoDispatch ? 'ON' : 'OFF'}`);
+    updateAutomationUI();
+  }
+  function toggleAutoMRO() {
+    State.automation.autoMRO = !State.automation.autoMRO;
+    toast(`Auto Stonework Repointing: ${State.automation.autoMRO ? 'ON' : 'OFF'}`);
+    updateAutomationUI();
+  }
+  function toggleAutoRefuel() {
+    State.automation.autoRefuel = !State.automation.autoRefuel;
+    toast(`Auto Quarry Restock: ${State.automation.autoRefuel ? 'ON' : 'OFF'}`);
+    updateAutomationUI();
+  }
+  function updateAutomationUI() {
+    if($('chk-autoloop'))$('chk-autoloop').innerText = State.automation.autoDispatch ? 'ACTIVE' : 'ENABLE';
+    if($('chk-automro'))$('chk-automro').innerText = State.automation.autoMRO ? 'ACTIVE' : 'ENABLE';
+    if($('chk-autorefuel'))$('chk-autorefuel').innerText = State.automation.autoRefuel ? 'ACTIVE' : 'ENABLE';
+    renderMilestones();
+    renderSideMissions();
+  }
+
+  function generateSideMissions() {
+    let unlocked = State.routes.filter(r => r.unlocked);
+    if(unlocked.length === 0) unlocked = State.routes; 
+    
+    State.sideMissions = [];
+    for(let i=0; i<3; i++) {
+        let rt = unlocked[Math.floor(Math.random() * unlocked.length)];
+        State.sideMissions.push({
+            id: "sm_" + Date.now() + i,
+            title: `Patron Grant: ${rt.name}`,
+            desc: `Foundation seeks a landmark ${rt.role} featured on the ${rt.name} tour.`,
+            reqRoute: rt.id, reqRole: rt.role, readyToClaim: false,
+            rewardCash: Math.floor(rt.dist * 0.45) + 150,
+            rewardTier: Math.min(9, Math.floor(rt.dist / 1000))
+        });
+    }
+  }
+
+  function refreshSideMissions() {
+    generateSideMissions();
+    renderSideMissions();
+    toast("Patron commissions refreshed.");
+  }
+
+  function renderSideMissions() {
+    const list = $('side-missions-list'); if(!list) return; list.innerHTML = '';
+    State.sideMissions.forEach((m, idx) => {
+      let isReady = m.readyToClaim;
+      let rText = `+$${fmt(m.rewardCash)} & Free T${m.rewardTier+1} Deed`;
+      list.innerHTML += `
+        <div class="check-item ${isReady ? 'done' : ''}">
+          <div>
+            <div style="font-weight:bold; color:#fff;">${m.title}</div>
+            <div style="font-size:9.5px; color:var(--silver-dim);">${m.desc}</div>
+            <div style="font-size:9.5px; color:var(--status-green); font-weight:bold; margin-top:2px;">Endowment: ${rText}</div>
+          </div>
+          <div>
+            <button class="btn btn-green" ${isReady ? '' : 'disabled'} onclick="claimSideMission(${idx})">COLLECT</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function claimSideMission(idx) {
+    let m = State.sideMissions[idx];
+    if(!m || !m.readyToClaim) return;
+    
+    State.funds += m.rewardCash;
+    let bonusStrain = harvestStrain(m.rewardTier); 
+    State.fleet.push(bonusStrain);
+    toast(`Endowment Awarded! +$${fmt(m.rewardCash)} & ${bonusStrain.name} deeded!`);
+
+    State.sideMissions.splice(idx, 1);
+    
+    let unlocked = State.routes.filter(r => r.unlocked);
+    if(unlocked.length === 0) unlocked = State.routes;
+    let rt = unlocked[Math.floor(Math.random() * unlocked.length)];
+    State.sideMissions.push({
+        id: "sm_" + Date.now(),
+        title: `Patron Grant: ${rt.name}`,
+        desc: `Foundation seeks a landmark ${rt.role} featured on the ${rt.name} tour.`,
+        reqRoute: rt.id, reqRole: rt.role, readyToClaim: false,
+        rewardCash: Math.floor(rt.dist * 0.45) + 150,
+        rewardTier: Math.min(9, Math.floor(rt.dist / 1000))
+    });
+
+    updateHUD(); renderSideMissions();
+  }
+
+  function renderMilestones() {
+    const list = $('milestone-list'); if(!list) return; list.innerHTML = '';
+    MILESTONES.forEach(m => {
+      let isClaimed = State.claimedMilestones.includes(m.id);
+      let canClaim = !isClaimed && m.req(State);
+      list.innerHTML += `
+        <div class="check-item ${isClaimed ? 'done' : ''}">
+          <div>
+            <div style="font-weight:bold; color:${isClaimed ? 'var(--status-green)' : '#fff'};">${isClaimed ? '✓ ' : ''}${m.title}</div>
+            <div style="font-size:9.5px; color:var(--silver-dim);">${m.desc}</div>
+            <div style="font-size:9.5px; color:var(--status-amber); font-weight:bold; margin-top:1px;">Grant: +$${fmt(m.reward)}</div>
+          </div>
+          <div>
+            ${isClaimed 
+              ? `<span style="color:var(--status-green); font-weight:bold; font-size:9px;">CLAIMED</span>` 
+              : `<button class="btn btn-green" ${canClaim ? '' : 'disabled'} onclick="claimMilestone('${m.id}')">CLAIM</button>`
+            }
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function claimMilestone(mId) {
+    let m = MILESTONES.find(x => x.id === mId);
+    if(!m || State.claimedMilestones.includes(mId) || !m.req(State)) return;
+    State.claimedMilestones.push(mId);
+    State.funds += m.reward;
+    toast(`Milestone Achieved: +$${fmt(m.reward)}`);
+    updateHUD(); renderMilestones();
+  }
+
+  /* ================= UPGRADES ================= */
+  function getUpgCost(type, lvl) { return type==='mkt' ? Math.floor(250*Math.pow(1.5,lvl)) : Math.floor(400*Math.pow(1.6,lvl)); }
+  function renderUpgrades() {
+    let mC = getUpgCost('mkt', State.upgrades.mkt); let eC = getUpgCost('eng', State.upgrades.eng);
+    if($('upg-mkt-lvl'))$('upg-mkt-lvl').innerText=State.upgrades.mkt; 
+    if($('upg-mkt-pct'))$('upg-mkt-pct').innerText=State.upgrades.mkt*5; 
+    if($('upg-mkt-cost'))$('upg-mkt-cost').innerText=fmt(mC);
+    
+    if($('upg-eng-lvl'))$('upg-eng-lvl').innerText=State.upgrades.eng; 
+    if($('upg-eng-pct'))$('upg-eng-pct').innerText=Math.min(70, State.upgrades.eng*2); 
+    if($('upg-eng-cost'))$('upg-eng-cost').innerText=fmt(eC);
+  }
+  function buyUpgrade(type) {
+    let cost = getUpgCost(type, State.upgrades[type]);
+    if(State.funds < cost) { toast("Insufficient Funds."); return; }
+    State.funds -= cost; State.upgrades[type]++;
+    updateHUD(); renderUpgrades(); toast("Engineering upgraded.");
+  }
+
+  /* ================= WORLD EXPO TOUR DISPATCH ================= */
+  function dispatchFlight(pUid) {
+    const p = State.fleet.find(x=>x.uid===pUid); if(!p||p.status==='IN_FLIGHT'||!p.assignedRoute||!p.assignedPilot)return;
+    const r = State.routes.find(x=>x.id===p.assignedRoute); const pl = State.pilots.find(x=>x.uid===p.assignedPilot); if(!r||!pl)return;
+    
+    if(p.condition < 45) {
+      if(State.automation.autoMRO && State.funds >= Math.ceil((100-p.condition)*0.5)) {
+        maintainAirframe(p.uid);
+      } else {
+        toast("[WEATHERED STONE] Integrity low. Must Restore Masonry."); return;
+      }
+    }
+
+    let yieldM = 1.0 + (State.upgrades.mkt*0.05); let speedD = 1.0; let fuelD = 1.0; let safeD = 1.0;
+    if(pl.bType==='ACOUSTICS') yieldM *= (1 + pl.bonus/100);
+    if(pl.bType==='SPEED') speedD = 1 + pl.bonus/100; 
+    if(pl.bType==='MASONRY') fuelD = 1 + pl.bonus/100;
+    if(pl.bType==='LIGHTING') safeD = 1 + pl.bonus/100;
+
+    let baseMs = Math.max(5000, Math.min(90000, (r.dist/8000)*90000));
+    let msTime = Math.max(1000, baseMs / speedD); 
+
+    let fBurn = Math.max(1, Math.floor((r.dist * 0.025) * (1 - Math.min(0.7, State.upgrades.eng*0.02)) / fuelD));
+    
+    if(State.fuelReserve < fBurn) {
+      if(State.automation.autoRefuel && State.funds >= 2500 * State.fuelSpotPrice) {
+        State.funds -= 2500 * State.fuelSpotPrice;
+        State.fuelReserve += 2500;
+      } else {
+        toast("Insufficient Masonry Supply."); return;
+      }
+    }
+    State.fuelReserve -= fBurn;
+
+    let bRev = Math.max(15, Math.floor(r.dist * 0.16 * yieldM));
+    
+    p.status='IN_FLIGHT'; p.flightStart=Date.now(); p.flightDuration=msTime; p.flightEnd=p.flightStart+msTime; p.expRev=bRev; p.wear=10/safeD;
+    
+    State.sideMissions.forEach(m => {
+        if(!m.readyToClaim && p.assignedRoute === m.reqRoute && p.role === m.reqRole) {
+            m.readyToClaim = true;
+            toast(`Patron Impressed: ${m.title}`);
+            if($('tab-checklist').classList.contains('active')) renderSideMissions();
+        }
+    });
+
+    needsFleetRender = true; updateHUD();
+  }
+  function dispatchAll() { State.fleet.filter(p=>p.status==='READY'&&p.assignedRoute&&p.assignedPilot).forEach(p=>dispatchFlight(p.uid)); }
+  function maintainAirframe(pUid) { const p=State.fleet.find(x=>x.uid===pUid); if(!p||p.status==='IN_FLIGHT')return; let c=Math.ceil((100-p.condition)*0.5); if(State.funds<c)return; State.funds-=c; p.condition=100; updateHUD(); needsFleetRender = true; }
+  function maintainAll() { let c=0; State.fleet.filter(p=>p.condition<90&&p.status!=='IN_FLIGHT').forEach(p=>c+=Math.ceil((100-p.condition)*0.5)); if(c===0||State.funds<c)return; State.funds-=c; State.fleet.forEach(p=>p.condition=100); updateHUD(); renderFleet(); }
+
+  /* ================= 10-LANE ESTATE AUCTIONS (UNTOUCHED CRAZY BID SPIKES!) ================= */
+  function initAuction(uid, type) {
+    if(State.auctions.length>=10){toast("Auction house full.");return;}
+    let item;
+    if(type==='plane') { let i=State.fleet.findIndex(x=>x.uid===uid); if(i===-1)return; item=State.fleet[i]; if(item.assignedPilot){ let px=State.pilots.find(x=>x.uid===item.assignedPilot); if(px)px.assignedTo=null; } State.fleet.splice(i,1); }
+    if(type==='pilot') { let i=State.pilots.findIndex(x=>x.uid===uid); if(i===-1)return; item=State.pilots[i]; State.pilots.splice(i,1); }
+    
+    State.auctions.push({ item:item, type:type, baseVal:item.value, timer:20.0, currentBid:Math.max(1, Math.floor(item.value*0.9)), log:[] });
+    updateHUD(); renderAuctions(); renderFleet(); renderPilots(); toast("Consigned to Estate Auctions.");
+  }
+  
+  function fillAuctions(type) {
+    let a=10-State.auctions.length; if(a<=0) { toast("Auction house full."); return; }
+    
+    let c = type==='planes' 
+      ? State.fleet.filter(p=>p.status==='READY'&&!p.assignedPilot).sort((x,y)=>x.value-y.value) 
+      : State.pilots.filter(p=>!p.assignedTo&&!p.locked).sort((x,y)=>x.value-y.value);
+        
+    if(c.length===0){toast("No eligible landmarks/architects available.");return;}
+    
+    let loaded = 0;
+    c.slice(0,a).forEach(item=>{ 
+      if(type==='planes'){ let i=State.fleet.findIndex(x=>x.uid===item.uid); State.fleet.splice(i,1); }
+      if(type==='pilots'){ let i=State.pilots.findIndex(x=>x.uid===item.uid); State.pilots.splice(i,1); }
+      State.auctions.push({item:item, type:type === 'planes' ? 'plane' : 'pilot', baseVal:item.value, timer:20.0, currentBid:Math.max(1, Math.floor(item.value*0.9)), log:[]}); 
+      loaded++;
+    });
+    
+    updateHUD(); renderPilots(); renderFleet(); renderAuctions(); 
+    toast(`Consigned ${loaded} lots to Estate Auctions.`);
+  }
+
+  function renderAuctions() {
+    const b=$('auction-board'); if(!b)return; $('auction-count').innerText=State.auctions.length; b.innerHTML='';$('auction-idle').style.display = State.auctions.length===0 ? 'block' : 'none';
+    State.auctions.forEach((a) => {
+      if (a.type === 'plane' || a.type === 'planes') ensureTreeImage(a.item);
+      let hLog = a.log.map(l=>`<div>${l}</div>`).join('');
+      let col = a.item.tierColor || '#fff';
+      
+      b.innerHTML+=`
+        <div class="auction-slot">
+          <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div style="display:flex; gap:8px; align-items:center;">
+              ${(a.type === 'plane' || a.type === 'planes') ? `<img src="${a.item.imgData}" style="width:40px; height:40px; image-rendering:pixelated; background:#000; border:1px solid #222938;" />` : ''}
+              <div>
+                <div style="font-size:12px;font-weight:bold;color:${col};">${a.item.name}</div>
+                <div class="stat-block" style="font-size:9px;">EST: $${fmt(a.baseVal)}</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div id="auc-timer-${a.item.uid}" style="font-size:8.5px;color:var(--silver-dim);font-weight:bold;">TIME [${a.timer.toFixed(1)}s]</div>
+              <div id="auc-bid-${a.item.uid}" style="font-size:14px;font-weight:bold;color:var(--status-green);font-family:monospace;">$${fmt(a.currentBid)}</div>
+            </div>
+          </div>
+          <div class="auction-timer-bg"><div id="auc-bar-${a.item.uid}" class="auction-timer-bar" style="width:${(a.timer/20)*100}%;"></div></div>
+          <div class="auction-log">${hLog}</div>
+        </div>
+      `;
+    });
+  }
+
+  /* ================= GAME LOOP ================= */
+  const FACTIONS = ["UNESCO Heritage Trust","Sovereign Wealth Fund","Vatican Patron","Billionaire Preservationist"];
+  function gameTick() {
+    let n = Date.now();
+    let auctionChanged = false;
+    
+    // Market Timer
+    State.marketTimer -= 0.1;
+    let mT = $('market-timer'); if(mT) mT.innerText = Math.max(0, State.marketTimer).toFixed(1);
+    if(State.marketTimer <= 0) { State.marketTimer = 10.0; refreshMarket(); }
+
+    // World Tours
+    State.fleet.forEach(p => {
+      if(p.status==='IN_FLIGHT') {
+        let pct = ((n-p.flightStart)/p.flightDuration)*100;
+        if(pct>=100) { 
+          p.status='READY'; State.funds+=p.expRev; p.condition=Math.max(10, p.condition-p.wear); updateHUD(); 
+          let st=$(`st-${p.uid}`); if(st) st.innerHTML=`STATUS: <strong style="color:#fff;">READY</strong>`; 
+          let b=$(`bar-${p.uid}`); if(b){b.style.width='0%'; b.parentElement.style.display='none';} 
+          
+          if(State.automation.autoDispatch && p.assignedRoute && p.assignedPilot) {
+            setTimeout(() => dispatchFlight(p.uid), 200);
+          } else {
+            needsFleetRender = true; 
+          }
+        } 
+        else { let b=$(`bar-${p.uid}`); if(b) b.style.width=pct+'%'; }
+      }
+    });
+
+    if(needsFleetRender) {
+      if($('tab-fleet').classList.contains('active')) renderFleet();
+      needsFleetRender = false;
+    }
+
+    // Auctions (Exact Unchanged Bidding War & Overtime Logic!)
+    if(State.auctions.length>0) {
+      for(let i=State.auctions.length-1; i>=0; i--) {
+        let a=State.auctions[i]; a.timer-=0.1; 
+        
+        let uiT = $(`auc-timer-${a.item.uid}`);
+        let uiB = $(`auc-bar-${a.item.uid}`);
+        let uiBid = $(`auc-bid-${a.item.uid}`);
+
+        if(a.timer>0 && Math.random()<0.10) {
+          let f=FACTIONS[Math.floor(Math.random()*FACTIONS.length)]; let m=1.05+(Math.random()*0.10);
+          if(Math.random()<0.015) { m=2.0+(Math.random()*18.0); a.log.push(`<span style="color:var(--status-amber);">[BID WAR] Spike!</span>`); }
+          let nB=Math.floor(a.currentBid*m); if(nB<=a.currentBid) nB=a.currentBid+1; a.currentBid=nB;
+          a.log.push(`<span style="color:var(--silver-bright);">[${f}] bids $${fmt(a.currentBid)}</span>`);
+          if(a.log.length>3) a.log.shift();
+          if(a.timer<=1.0){ a.timer=3.0; a.log.push(`<span style="color:var(--status-red);">[OVERTIME] Reset to 3s!</span>`); }
+          if(uiBid) uiBid.innerText = "$" + fmt(a.currentBid);
+          auctionChanged = true;
+        } else {
+          if(uiT) uiT.innerText = `TIME [${Math.max(0, a.timer).toFixed(1)}s]`;
+          if(uiB) { uiB.style.width = ((a.timer/20)*100) + '%'; uiB.style.background = a.timer <= 3 ? 'var(--status-red)' : 'var(--status-green)'; }
+        }
+
+        if(a.timer<=0){ 
+          State.funds+=a.currentBid; State.statAuctionsSold++;
+          toast(`SOLD for $${fmt(a.currentBid)}!`); 
+          State.auctions.splice(i,1); updateHUD(); 
+          auctionChanged = true;
+        }
+      }
+      
+      if(auctionChanged && $('tab-auction').classList.contains('active')) renderAuctions();
+    }
+  }
+
+  /* ================= INIT & NAVIGATION ================= */
+  function setTab(tabId) {
+    document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('active'); if(b.getAttribute('onclick').includes(tabId)) b.classList.add('active'); });
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+    const target = $('tab-'+tabId); if(target) target.classList.add('active');
+
+    if(tabId==='fleet') renderFleet();
+    if(tabId==='pilots') renderPilots();
+    if(tabId==='routes') renderRoutes();
+    if(tabId==='auction') renderAuctions();
+    if(tabId==='checklist') updateAutomationUI();
+    if(tabId==='upgrades') renderUpgrades();
+    if(tabId==='gallery') renderGallery();
+  }
+  function godMode() {
+    State.funds += 1000000; State.fuelReserve += 100000;
+    State.fleet.forEach(p => p.condition = 100);
+    toast("UNESCO ENDOWMENT: +$1M Funds, +100K Tons Stone, Estates Restored.");
+    updateHUD(); renderFleet();
+  }
+
+  function initUI() {
+    if(!State.gallery) State.gallery = [];
+    if(!State.routes || State.routes.length < 400) State.routes = generateRoutes();
+    if(!State.sideMissions || State.sideMissions.length === 0) generateSideMissions();
+    updateHUD(); refreshMarket();
+    if(globalInterval) clearInterval(globalInterval); globalInterval = setInterval(gameTick, 100);
+  }
+  initUI();
+</script>
+</body>
+</html>
